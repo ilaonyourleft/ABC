@@ -158,4 +158,4 @@ cython_debug/
 c_implementation/src/ABC_sequential
 c_implementation/src/ABC_sequential.dSYM/**
 
-.vscode
+.vscode/
