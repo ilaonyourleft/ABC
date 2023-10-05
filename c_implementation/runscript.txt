@@ -1,0 +1,12 @@
+cd /Users/ilariamalinconico/Desktop/repositories/ABC/c_implementation/src/ 
+
+--- compile library (creating library object file)
+(e.g. gcc -o mylib.o -c mylib.c)
+gcc -o ABC_sequential_lib.o -c ABC_sequential_lib.c
+
+--- compile program with library (compile linking library object file)
+(e.g. gcc  -o myprog test.c somelib.o)
+gcc -o ABC_sequential ABC_sequential.c ABC_sequential_lib.o
+
+--- run program
+./ABC_sequential
