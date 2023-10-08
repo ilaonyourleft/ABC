@@ -159,3 +159,7 @@ c_implementation/src/ABC_sequential
 c_implementation/src/ABC_sequential.dSYM/**
 
 .vscode/
+
+ABC_sequential
+ABC_parallel
+*.o
