@@ -1,5 +1,7 @@
 cd /Users/ilariamalinconico/Desktop/repositories/ABC/c_implementation/src/ 
 
+*** SEQUENTIAL ***
+
 --- compile library (creating library object file)
 (e.g. gcc -o mylib.o -c mylib.c)
 gcc -o ABC_sequential_lib.o -c ABC_sequential_lib.c
@@ -10,3 +12,19 @@ gcc -o ABC_sequential ABC_sequential.c ABC_sequential_lib.o
 
 --- run program
 ./ABC_sequential
+
+*** PARALLEL ***
+
+--- compile program
+-O optimize
+-o <file> where to put the executable
+-l link library
+(mpicc -o myprog myprog.c)
+mpicc -o ABC_parallel ABC_parallel.c
+
+--- run program
+-np <p> number of processes
+<exec> executable
+<arg1> ... command-line arguments
+(mpirun -np <p> <exec> <arg1> ...)
+mpirun -np 1 ABC_parallel

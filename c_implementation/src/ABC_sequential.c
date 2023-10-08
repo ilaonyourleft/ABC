@@ -16,7 +16,7 @@
 int main(void) {
 	// puts("Angle Based Clustering Program - Sequential");
 	FILE *file = fopen("../data/dataset_v3_half.csv", "r");
-	FILE *output = fopen("../results/results.txt", "w");
+	FILE *output = fopen("../results/results_sequential.txt", "w");
 	int i, j, g, x, y, counter = 0, factor = BETA * N, otherFactor;
 	int **ptrPoints, **ptrKnnPoint, **ptrBorderPoints, *ptrLabels, **ptrNonBorderPoints, *ptrNonBorderLabels;
 	float *ptrMeanPoint, *ptrDirectionalAnglesPoint, *ptrEnclosingAnglesPoint, *ptrBorderDegreesPoint, **ptrBorderPointsAll;
