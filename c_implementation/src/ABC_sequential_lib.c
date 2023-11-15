@@ -26,6 +26,9 @@
 
 // MISCELLANEOUS
 
+/**
+ * Print an error message and exit the program if memory allocation fails.
+ */
 void printErrorAllocation() {
 	printf("Could not allocate memory to pointer.\n");
 	exit(MEMORY_ALLOCATION_ERROR);
@@ -33,10 +36,24 @@ void printErrorAllocation() {
 
 // KNN methods
 
+/**
+ * Calculate the Euclidean distance between two points in a two-dimensional space.
+ *
+ * @param x1 The x-coordinate of the first point.
+ * @param y1 The y-coordinate of the first point.
+ * @param x2 The x-coordinate of the second point.
+ * @param y2 The y-coordinate of the second point.
+ * @return The Euclidean distance between the two points.
+ */
 float euclideanDistance(int x1, int y1, int x2, int y2) {
 	return sqrtf(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
+/**
+ * Sorts an array of distances in ascending order based on the third element. (Bubble sort)
+ *
+ * @param distancesPoints The array of distances to be sorted.
+ */
 void sortArrayDistances(float **distancesPoints) {
 	float tmp[3];
 
@@ -57,6 +74,15 @@ void sortArrayDistances(float **distancesPoints) {
 	}
 }
 
+/**
+ * Get the nearest neighbors of a given point based on Euclidean distances.
+ *
+ * @param points     The array of points.
+ * @param x          The x-coordinate of the reference point.
+ * @param y          The y-coordinate of the reference point.
+ * @param knn        The array to store the nearest neighbors.
+ * @param meanPoint  The array to store the mean point of the nearest neighbors.
+ */
 // non permette di ritornare un array, ma si può ritornare il puntatore all'array specificandone il nome senza indice
 void getNeighbors(int **points, int x, int y, int **knn, float *meanPoint) {
 	// non ritorna l'indirizzo di una variabile locale all'esterno della funzione, quindi serve static nella definizione della variabile locale
@@ -107,6 +133,14 @@ void getNeighbors(int **points, int x, int y, int **knn, float *meanPoint) {
 
 // ENCLOSING ANGLES
 
+/**
+ * Calculate the directional angle between the line segments formed by the center, mean point, and neighbor.
+ *
+ * @param center     The coordinates of the center point.
+ * @param meanPoint  The coordinates of the mean point.
+ * @param neighbor   The coordinates of the neighbor point.
+ * @return The directional angle in degrees.
+ */
 float getDirectionalAngle(int *center, float *meanPoint, int *neighbor) {
 	float uX = 0.00, uY = 0.00, vX = 0.00, vY = 0.00, directionalAngle = 0.00, directionalAngleDegree = 0.00;
 
@@ -128,6 +162,12 @@ float getDirectionalAngle(int *center, float *meanPoint, int *neighbor) {
 	return directionalAngleDegree;
 }
 
+/**
+ * Find the number of directional angles that are greater than or equal to 180 degrees.
+ *
+ * @param directionalAngles The array of directional angles.
+ * @return The number of directional angles greater than or equal to 180 degrees.
+ */
 int findSize(float *directionalAngles) {
 	int counter = 0;
 	for (int i = 0; i < K; i++) {
@@ -138,6 +178,12 @@ int findSize(float *directionalAngles) {
 	return counter;
 }
 
+/**
+ * Calculate the enclosing angle based on the directional angles greater than or equal to 180 degrees.
+ *
+ * @param directionalAngles The array of directional angles.
+ * @return The enclosing angle in degrees.
+ */
 float getEnclosingAngle(float *directionalAngles) {
 	int sizeTmp = findSize(directionalAngles), i;
 	float tmpDirectionalAngles[sizeTmp], enclosingAngle = 0.00;
@@ -160,6 +206,12 @@ float getEnclosingAngle(float *directionalAngles) {
 	return enclosingAngle;
 }
 
+/**
+ * Calculate the border degree based on the minimum directional angle.
+ *
+ * @param directionalAngles The array of directional angles.
+ * @return The border degree in degrees.
+ */
 float getBorderDegree(float *directionalAngles) {
 	float minimumAngle = directionalAngles[0], borderDegree = 0.00;
 	for (int i = 0; i < K; i++) {
@@ -172,6 +224,12 @@ float getBorderDegree(float *directionalAngles) {
 	return borderDegree;
 }
 
+/**
+ * Check if a point is a border point based on the enclosing angle.
+ *
+ * @param enclosingAngle The enclosing angle in degrees.
+ * @return 1 if the point is a border point, 0 otherwise.
+ */
 int isBorderPoint(float enclosingAngle) {
 	if (enclosingAngle < 60) {
 		return 1;
@@ -180,6 +238,11 @@ int isBorderPoint(float enclosingAngle) {
 	}
 }
 
+/**
+ * Sort the array of border degrees in descending order based on the third element of each row. (Bubble sort)
+ *
+ * @param borderDegrees The 2D array of border degrees.
+ */
 void sortArrayBorderDegrees(float **borderDegrees) {
 	float tmp[3];
 
@@ -200,21 +263,43 @@ void sortArrayBorderDegrees(float **borderDegrees) {
 	}
 }
 
+/**
+ * Get the border points from the sorted array of border points.
+ *
+ * @param borderPointsAll The 2D array of border points.
+ * @param sizeArray       The size of the array.
+ * @param borderPoints    The 2D array to store the border points.
+ */
 void getBorderPoints(float **borderPointsAll, int sizeArray, int **borderPoints) {
 	sortArrayBorderDegrees(borderPointsAll);
 	for (int i = 0; i < sizeArray; i++) {
 		borderPoints[i][0] = borderPointsAll[i][0];
 		borderPoints[i][1] = borderPointsAll[i][1];
 	}
-
 }
 
 // DBSCAN
 
+/**
+ * Calculate the module (magnitude) of a vector given its x and y components.
+ *
+ * @param x The x component of the vector.
+ * @param y The y component of the vector.
+ * @return The module of the vector.
+ */
 float moduleVector(int x, int y) {
 	return sqrt(pow(x, 2) + pow(y, 2));
 }
 
+/**
+ * Calculate the modified distance between two points based on the direction angle between their vectors.
+ *
+ * @param aX The x component of the first point.
+ * @param aY The y component of the first point.
+ * @param bX The x component of the second point.
+ * @param bY The y component of the second point.
+ * @return The modified distance between the two points.
+ */
 float directionAngleModifiedDistanceFunction(int aX, int aY, int bX, int bY) {
 	double product = 0.00;
 	float angleBetweenVectors = 0.00;
@@ -223,6 +308,17 @@ float directionAngleModifiedDistanceFunction(int aX, int aY, int bX, int bY) {
 	return euclideanDistance(aX, aY, bX, bY) * (1 + ((0.5 - 1) / M_PI) * angleBetweenVectors);
 }
 
+/**
+ * Perform a region query to find the neighboring points within a specified distance threshold.
+ *
+ * @param borderPoints The 2D array of border points.
+ * @param neighbors    The 2D array to store the neighboring points.
+ * @param factor       The number of border points.
+ * @param x            The x component of the point to query.
+ * @param y            The y component of the point to query.
+ * @param epsilon      The distance threshold.
+ * @return The number of neighboring points found.
+ */
 int regionQuery(int **borderPoints, int **neighbors, int factor, int x, int y, int epsilon) {
 	int counter = 0;
 	for (int i = 0; i < factor; i++) {
@@ -237,6 +333,14 @@ int regionQuery(int **borderPoints, int **neighbors, int factor, int x, int y, i
 	return counter;
 }
 
+/**
+ * Check if a point is already a neighbor in the list of neighbors.
+ *
+ * @param neighbors    The 2D array of neighbors.
+ * @param lenNeighbors The length of the neighbors array.
+ * @param index        The index of the point to check.
+ * @return 1 if the point is already a neighbor, 0 otherwise.
+ */
 int checkIfAlreadyNeighbor(int **neighbors, int lenNeighbors, int *index) {
 	int flag = 0;
 	for (int i = 0; i < lenNeighbors; i++) {
@@ -250,6 +354,21 @@ int checkIfAlreadyNeighbor(int **neighbors, int lenNeighbors, int *index) {
 	return flag;
 }
 
+/**
+ * Grow a cluster by expanding it with neighboring points.
+ *
+ * @param borderPoints      The 2D array of border points.
+ * @param factor            The number of border points.
+ * @param labels            The array to store the cluster labels.
+ * @param index             The index of the initial point.
+ * @param x                 The x component of the initial point.
+ * @param y                 The y component of the initial point.
+ * @param neighbors         The 2D array of neighboring points.
+ * @param lenNeighbors      The length of the neighbors array.
+ * @param clusterId         The ID of the cluster.
+ * @param epsilon           The distance threshold for neighboring points.
+ * @param minNumberPoints   The minimum number of points required to form a cluster.
+ */
 void growCluster(int **borderPoints, int factor, int *labels, int index, int x, int y, int **neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints) {
 	labels[index] = clusterId;
 	int counter = 0, i, j, neighborsIncrement;
@@ -300,6 +419,15 @@ void growCluster(int **borderPoints, int factor, int *labels, int index, int x, 
 	free(ptrNextNeighbors);
 }
 
+/**
+ * Assign cluster labels to the border points based on density connectivity.
+ *
+ * @param borderPoints      The 2D array of border points.
+ * @param factor            The number of border points.
+ * @param epsilon           The distance threshold for neighboring points.
+ * @param minNumberPoints   The minimum number of points required to form a cluster.
+ * @param labels            The array to store the cluster labels.
+ */
 void getLabelsBorderPoints(int **borderPoints, int factor, int epsilon, int minNumberPoints, int *labels) {
 	int clusterId = 0, i, j;
 	int **ptrNeighbors;
@@ -341,6 +469,15 @@ void getLabelsBorderPoints(int **borderPoints, int factor, int epsilon, int minN
 
 // CLUSTER
 
+/**
+ * Check if a point is a border point.
+ *
+ * @param borderPoints    The 2D array of border points.
+ * @param factor          The number of border points.
+ * @param x               The x component of the point to check.
+ * @param y               The y component of the point to check.
+ * @return 1 if the point is a border point, 0 otherwise.
+ */
 int checkIfBorderPoint(int **borderPoints, int factor, int x, int y) {
 	for (int i = 0; i < factor; i++) {
 		if (borderPoints[i][0] == x && borderPoints[i][1] == y) {
@@ -350,6 +487,14 @@ int checkIfBorderPoint(int **borderPoints, int factor, int x, int y) {
 	return 0;
 }
 
+/**
+ * Get the non-border points from the given points array.
+ *
+ * @param points            The 2D array of points.
+ * @param borderPoints      The 2D array of border points.
+ * @param factor            The number of border points.
+ * @param nonBorderPoints   The 2D array to store the non-border points.
+ */
 void getNonBorderPoints(int **points, int **borderPoints, int factor, int **nonBorderPoints) {
 	int counter = 0;
 	for (int i = 0; i < N; i++) {
@@ -361,6 +506,13 @@ void getNonBorderPoints(int **points, int **borderPoints, int factor, int **nonB
 	}
 }
 
+/**
+ * Find the minimum distance from the given distances array.
+ *
+ * @param distances   The 2D array of distances.
+ * @param factor      The number of distances.
+ * @return The minimum distance found.
+ */
 float findMinimumDistance(float **distances, int factor) {
 	float minimumDistance = 0.0;
 	for (int i = 0; i < factor; i++) {
@@ -375,6 +527,16 @@ float findMinimumDistance(float **distances, int factor) {
 	return minimumDistance;
 }
 
+/**
+ * Assign cluster labels to the non-border points based on distance and labels of border points.
+ *
+ * @param borderPoints        The 2D array of border points.
+ * @param factor              The number of border points.
+ * @param labels              The array of cluster labels for border points.
+ * @param nonBorderPoints     The 2D array of non-border points.
+ * @param otherFactor         The number of non-border points.
+ * @param nonBorderLabels     The array to store the cluster labels for non-border points.
+ */
 void getLabelsNonBorderPoints(int **borderPoints, int factor, int *labels, int **nonBorderPoints, int otherFactor, int *nonBorderLabels) {
 	float **distancesAndLabels, minDistance;
 	int labelMin;
