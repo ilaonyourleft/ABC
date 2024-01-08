@@ -13,17 +13,18 @@
 #include <math.h>
 #include "ABC_sequential_lib.h"
 
-int main(void) {
+int main(int argc, char *argv[]) {
 	// puts("Angle Based Clustering Program - Sequential");
 
 	// Open input and output files
-	FILE *file = fopen("../data/dataset_v3_half.csv", "r");
+	FILE *file = fopen("../data/dataset2.csv", "r");
 	FILE *output = fopen("../results/results_sequential.txt", "w");
 
 	// Variable declarations
-	int i, j, g, x, y, counter = 0, factor = BETA * N, otherFactor;
-	int **ptrPoints, **ptrKnnPoint, **ptrBorderPoints, *ptrLabels, **ptrNonBorderPoints, *ptrNonBorderLabels;
-	float *ptrMeanPoint, *ptrDirectionalAnglesPoint, *ptrEnclosingAnglesPoint, *ptrBorderDegreesPoint, **ptrBorderPointsAll;
+	int i, j, g, d, e, counter = 0, factor = BETA * N, otherFactor;
+	float x, y = 0.0;
+	int *ptrLabels, *ptrNonBorderLabels;
+	float *ptrMeanPoint, *ptrDirectionalAnglesPoint, *ptrEnclosingAnglesPoint, *ptrBorderDegreesPoint, **ptrBorderPointsAll, **ptrPoints, **ptrKnnPoint, **ptrBorderPoints, **ptrNonBorderPoints;
 
 	// Error handling for file opening
 	if (file == NULL || output == NULL) {
@@ -33,12 +34,12 @@ int main(void) {
 
 	// --------------------------------------------------- MEMORY ALLOCATIONS
 
-	ptrPoints = calloc(N, sizeof(int *));
+	ptrPoints = calloc(N, sizeof(float *));
 	if (ptrPoints == NULL) {
 		printErrorAllocation();
 	} else {
 		for (i = 0; i < N; i++) {
-			ptrPoints[i] = calloc(2, sizeof(int));
+			ptrPoints[i] = calloc(2, sizeof(float));
 			if (ptrPoints[i] == NULL) {
 				printErrorAllocation();
 			}
@@ -55,12 +56,12 @@ int main(void) {
 		printErrorAllocation();
 	}
 
-	ptrKnnPoint = calloc(K, sizeof(int *));
+	ptrKnnPoint = calloc(K, sizeof(float *));
 	if (ptrKnnPoint == NULL) {
 		printErrorAllocation();
 	} else {
 		for (i = 0; i < K; i++) {
-			ptrKnnPoint[i] = calloc(2, sizeof(int));
+			ptrKnnPoint[i] = calloc(2, sizeof(float));
 			if (ptrKnnPoint[i] == NULL) {
 				printErrorAllocation();
 			}
@@ -89,12 +90,12 @@ int main(void) {
 		}
 	}
 
-	ptrBorderPoints = calloc(factor, sizeof(int *));
+	ptrBorderPoints = calloc(factor, sizeof(float *));
 	if (ptrBorderPoints == NULL) {
 		printErrorAllocation();
 	} else {
 		for (i = 0; i < factor; i++) {
-			ptrBorderPoints[i] = calloc(2, sizeof(int));
+			ptrBorderPoints[i] = calloc(2, sizeof(float));
 			if (ptrBorderPoints[i] == NULL) {
 				printErrorAllocation();
 			}
@@ -108,7 +109,7 @@ int main(void) {
 
 	// Create an array of points
 	for (i = 0; i < N; i++) {
-		fscanf(file, "%d,%d", &x, &y);
+		fscanf(file, "%f,%f", &x, &y);
 		ptrPoints[i][0] = x;
 		ptrPoints[i][1] = y;
 	}
@@ -121,12 +122,12 @@ int main(void) {
 		getNeighbors(ptrPoints, ptrPoints[i][0], ptrPoints[i][1], ptrKnnPoint, ptrMeanPoint);
 
 		// Write the k nearest neighbors to the output file
-		for (g = 0; g < K; g++) {
-			if (ptrKnnPoint[g][0] != 0 && ptrKnnPoint[g][1] != 0) {
-				fprintf (output, "%d, %d\n", ptrKnnPoint[g][0], ptrKnnPoint[g][1]);
-			}
-		}
-		fprintf(output, "\n");
+		//for (g = 0; g < K; g++) {
+			//if (ptrKnnPoint[g][0] != 0 && ptrKnnPoint[g][1] != 0) {
+				//fprintf (output, "%d, %d\n", ptrKnnPoint[g][0], ptrKnnPoint[g][1]);
+			//}
+		//}
+		//fprintf(output, "\n");
 
 		// Find directional angles between the center, its k nearest neighbors, and the mean point
 		for (j = 0; j < K; j++) {
@@ -159,15 +160,22 @@ int main(void) {
 	}
 
 	// Get label for each border point
-	getLabelsBorderPoints(ptrBorderPoints, factor, 18000, 3, ptrLabels);
+	getLabelsBorderPoints(ptrBorderPoints, factor, 20, 50, ptrLabels);
+
+	// Write border points and labels to the output file
+	for (d = 0; d < factor; d++) {
+		if (ptrBorderPoints[d][0] != 0 && ptrBorderPoints[d][1] != 0 && ptrLabels[d] != -1) {
+			fprintf (output, "%f,%f,%d\n", ptrBorderPoints[d][0], ptrBorderPoints[d][1], ptrLabels[d]);
+		}
+	}
 
 	otherFactor = N - factor;
-	ptrNonBorderPoints = calloc(otherFactor, sizeof(int *));
+	ptrNonBorderPoints = calloc(otherFactor, sizeof(float *));
 	if (ptrNonBorderPoints == NULL) {
 		printErrorAllocation();
 	} else {
 		for (i = 0; i < otherFactor; i++) {
-			ptrNonBorderPoints[i] = calloc(2, sizeof(int));
+			ptrNonBorderPoints[i] = calloc(2, sizeof(float));
 			if (ptrNonBorderPoints[i] == NULL) {
 				printErrorAllocation();
 			}
@@ -185,6 +193,13 @@ int main(void) {
 
 	// Get labels for non-border points
 	getLabelsNonBorderPoints(ptrBorderPoints, factor, ptrLabels, ptrNonBorderPoints, otherFactor, ptrNonBorderLabels);
+
+	// Write non border points and labels to the output file
+	for (e = 0; e < otherFactor; e++) {
+		if (ptrNonBorderPoints[e][0] != 0 && ptrNonBorderPoints[e][1] != 0 && ptrNonBorderLabels[e] != -1) {
+			fprintf (output, "%f,%f,%d\n", ptrNonBorderPoints[e][0], ptrNonBorderPoints[e][1], ptrNonBorderLabels[e]);
+		}
+	}
 	
 	// Free remaining allocated memory
 	free(ptrBorderPoints);

@@ -9,9 +9,9 @@
 #define ABC_SEQUENTIAL_H_
 #endif /* ABC_SEQUENTIAL_H_ */
 
-#define K 12
-#define BETA 0.2
-#define N 500
+#define K 12  // 12
+#define BETA 0.2  // 0.2
+#define N 3100  // 500
 
 #define OPEN_FILE_ERROR -1
 #define MEMORY_ALLOCATION_ERROR -2
@@ -45,7 +45,7 @@ void printErrorAllocation() {
  * @param y2 The y-coordinate of the second point.
  * @return The Euclidean distance between the two points.
  */
-float euclideanDistance(int x1, int y1, int x2, int y2) {
+float euclideanDistance(float x1, float y1, float x2, float y2) {
 	return sqrtf(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
@@ -84,7 +84,7 @@ void sortArrayDistances(float **distancesPoints) {
  * @param meanPoint  The array to store the mean point of the nearest neighbors.
  */
 // non permette di ritornare un array, ma si può ritornare il puntatore all'array specificandone il nome senza indice
-void getNeighbors(int **points, int x, int y, int **knn, float *meanPoint) {
+void getNeighbors(float **points, float x, float y, float **knn, float *meanPoint) {
 	// non ritorna l'indirizzo di una variabile locale all'esterno della funzione, quindi serve static nella definizione della variabile locale
 	float **distances;
 	float tmp_x = 0.00, tmp_y = 0.00;
@@ -141,7 +141,7 @@ void getNeighbors(int **points, int x, int y, int **knn, float *meanPoint) {
  * @param neighbor   The coordinates of the neighbor point.
  * @return The directional angle in degrees.
  */
-float getDirectionalAngle(int *center, float *meanPoint, int *neighbor) {
+float getDirectionalAngle(float *center, float *meanPoint, float *neighbor) {
 	float uX = 0.00, uY = 0.00, vX = 0.00, vY = 0.00, directionalAngle = 0.00, directionalAngleDegree = 0.00;
 
 	// mean point - center
@@ -270,7 +270,7 @@ void sortArrayBorderDegrees(float **borderDegrees) {
  * @param sizeArray       The size of the array.
  * @param borderPoints    The 2D array to store the border points.
  */
-void getBorderPoints(float **borderPointsAll, int sizeArray, int **borderPoints) {
+void getBorderPoints(float **borderPointsAll, int sizeArray, float **borderPoints) {
 	sortArrayBorderDegrees(borderPointsAll);
 	for (int i = 0; i < sizeArray; i++) {
 		borderPoints[i][0] = borderPointsAll[i][0];
@@ -287,7 +287,7 @@ void getBorderPoints(float **borderPointsAll, int sizeArray, int **borderPoints)
  * @param y The y component of the vector.
  * @return The module of the vector.
  */
-float moduleVector(int x, int y) {
+float moduleVector(float x, float y) {
 	return sqrt(pow(x, 2) + pow(y, 2));
 }
 
@@ -300,7 +300,7 @@ float moduleVector(int x, int y) {
  * @param bY The y component of the second point.
  * @return The modified distance between the two points.
  */
-float directionAngleModifiedDistanceFunction(int aX, int aY, int bX, int bY) {
+float directionAngleModifiedDistanceFunction(float aX, float aY, float bX, float bY) {
 	double product = 0.00;
 	float angleBetweenVectors = 0.00;
 	product = (double) aX * (double) bX + (double) aY * (double) bY;
@@ -319,7 +319,7 @@ float directionAngleModifiedDistanceFunction(int aX, int aY, int bX, int bY) {
  * @param epsilon      The distance threshold.
  * @return The number of neighboring points found.
  */
-int regionQuery(int **borderPoints, int **neighbors, int factor, int x, int y, int epsilon) {
+int regionQuery(float **borderPoints, float **neighbors, int factor, float x, float y, int epsilon) {
 	int counter = 0;
 	for (int i = 0; i < factor; i++) {
 		float disComputed = directionAngleModifiedDistanceFunction(x, y, borderPoints[i][0], borderPoints[i][1]);
@@ -341,7 +341,7 @@ int regionQuery(int **borderPoints, int **neighbors, int factor, int x, int y, i
  * @param index        The index of the point to check.
  * @return 1 if the point is already a neighbor, 0 otherwise.
  */
-int checkIfAlreadyNeighbor(int **neighbors, int lenNeighbors, int *index) {
+int checkIfAlreadyNeighbor(float **neighbors, int lenNeighbors, float *index) {
 	int flag = 0;
 	for (int i = 0; i < lenNeighbors; i++) {
 		if (neighbors[i][0] >= 0) {
@@ -369,12 +369,12 @@ int checkIfAlreadyNeighbor(int **neighbors, int lenNeighbors, int *index) {
  * @param epsilon           The distance threshold for neighboring points.
  * @param minNumberPoints   The minimum number of points required to form a cluster.
  */
-void growCluster(int **borderPoints, int factor, int *labels, int index, int x, int y, int **neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints) {
+void growCluster(float **borderPoints, int factor, int *labels, int index, float x, float y, float **neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints) {
 	labels[index] = clusterId;
 	int counter = 0, i, j, neighborsIncrement;
-	int **ptrNextNeighbors;
+	float **ptrNextNeighbors;
 
-	ptrNextNeighbors = calloc(factor, sizeof(int *));
+	ptrNextNeighbors = calloc(factor, sizeof(float *));
 	if (ptrNextNeighbors == NULL) {
 		printErrorAllocation();
 	} else {
@@ -428,11 +428,11 @@ void growCluster(int **borderPoints, int factor, int *labels, int index, int x, 
  * @param minNumberPoints   The minimum number of points required to form a cluster.
  * @param labels            The array to store the cluster labels.
  */
-void getLabelsBorderPoints(int **borderPoints, int factor, int epsilon, int minNumberPoints, int *labels) {
+void getLabelsBorderPoints(float **borderPoints, int factor, int epsilon, int minNumberPoints, int *labels) {
 	int clusterId = 0, i, j;
-	int **ptrNeighbors;
+	float **ptrNeighbors;
 
-	ptrNeighbors = calloc(factor, sizeof(int *));
+	ptrNeighbors = calloc(factor, sizeof(float *));
 	if (ptrNeighbors == NULL) {
 		printErrorAllocation();
 	} else {
@@ -478,7 +478,7 @@ void getLabelsBorderPoints(int **borderPoints, int factor, int epsilon, int minN
  * @param y               The y component of the point to check.
  * @return 1 if the point is a border point, 0 otherwise.
  */
-int checkIfBorderPoint(int **borderPoints, int factor, int x, int y) {
+int checkIfBorderPoint(float **borderPoints, int factor, float x, float y) {
 	for (int i = 0; i < factor; i++) {
 		if (borderPoints[i][0] == x && borderPoints[i][1] == y) {
 			return 1;
@@ -495,7 +495,7 @@ int checkIfBorderPoint(int **borderPoints, int factor, int x, int y) {
  * @param factor            The number of border points.
  * @param nonBorderPoints   The 2D array to store the non-border points.
  */
-void getNonBorderPoints(int **points, int **borderPoints, int factor, int **nonBorderPoints) {
+void getNonBorderPoints(float **points, float **borderPoints, int factor, float **nonBorderPoints) {
 	int counter = 0;
 	for (int i = 0; i < N; i++) {
 		if (checkIfBorderPoint(borderPoints, factor, points[i][0], points[i][1]) == 0) {
@@ -537,7 +537,7 @@ float findMinimumDistance(float **distances, int factor) {
  * @param otherFactor         The number of non-border points.
  * @param nonBorderLabels     The array to store the cluster labels for non-border points.
  */
-void getLabelsNonBorderPoints(int **borderPoints, int factor, int *labels, int **nonBorderPoints, int otherFactor, int *nonBorderLabels) {
+void getLabelsNonBorderPoints(float **borderPoints, int factor, int *labels, float **nonBorderPoints, int otherFactor, int *nonBorderLabels) {
 	float **distancesAndLabels, minDistance;
 	int labelMin;
 
