@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 	// puts("Angle Based Clustering Program - Sequential");
 
 	// Open input and output files
-	FILE *file = fopen("../data/dataset2.csv", "r");
+	FILE *file = fopen("../data/dataset1.csv", "r");
 	FILE *output = fopen("../results/results_sequential.txt", "w");
 
 	// Variable declarations
@@ -160,11 +160,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Get label for each border point
-	getLabelsBorderPoints(ptrBorderPoints, factor, 20, 50, ptrLabels);
+	getLabelsBorderPoints(ptrBorderPoints, factor, 19000, 3, ptrLabels);
 
 	// Write border points and labels to the output file
 	for (d = 0; d < factor; d++) {
-		if (ptrBorderPoints[d][0] != 0 && ptrBorderPoints[d][1] != 0 && ptrLabels[d] != -1) {
+		if (ptrBorderPoints[d][0] != 0 && ptrBorderPoints[d][1] != 0) {
 			fprintf (output, "%f,%f,%d\n", ptrBorderPoints[d][0], ptrBorderPoints[d][1], ptrLabels[d]);
 		}
 	}
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
 
 	// Write non border points and labels to the output file
 	for (e = 0; e < otherFactor; e++) {
-		if (ptrNonBorderPoints[e][0] != 0 && ptrNonBorderPoints[e][1] != 0 && ptrNonBorderLabels[e] != -1) {
+		if (ptrNonBorderPoints[e][0] != 0 && ptrNonBorderPoints[e][1] != 0) {
 			fprintf (output, "%f,%f,%d\n", ptrNonBorderPoints[e][0], ptrNonBorderPoints[e][1], ptrNonBorderLabels[e]);
 		}
 	}

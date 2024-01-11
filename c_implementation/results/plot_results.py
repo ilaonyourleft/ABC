@@ -9,9 +9,9 @@ def plot_points(x_points, y_points, labels):
     colors = [label_to_color[label] for label in labels]
 
     plt.scatter(x_points, y_points, c=colors, cmap='viridis')  # Scatter plot with colors based on labels
-    plt.xlabel('x')  # x-axis label
-    plt.ylabel('y')  # y-axis label
-    plt.title('Plot of x and y points with colors based on labels')  # Title of the plot
+    # plt.xlabel('x')  # x-axis label
+    # plt.ylabel('y')  # y-axis label
+    # plt.title('Plot of x and y points with colors based on labels')  # Title of the plot
     plt.grid(True)  # Show grid
     # plt.colorbar(label='Labels')  # Add colorbar with label names
     plt.show()  # Display the plot

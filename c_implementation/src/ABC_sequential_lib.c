@@ -10,8 +10,8 @@
 #endif /* ABC_SEQUENTIAL_H_ */
 
 #define K 12  // 12
-#define BETA 0.2  // 0.2
-#define N 3100  // 500
+#define BETA 0.3  // 0.2
+#define N 500  // 500
 
 #define OPEN_FILE_ERROR -1
 #define MEMORY_ALLOCATION_ERROR -2
