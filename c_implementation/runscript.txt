@@ -19,8 +19,8 @@ gcc -o ABC_sequential ABC_sequential.c ABC_sequential_lib.o
 -O optimize
 -o <file> where to put the executable
 -l link library
-(mpicc -o myprog myprog.c)
-mpicc -o ABC_parallel ABC_parallel.c
+(mpicc -o myprog myprog.c lib.o)
+mpicc -o ABC_parallel ABC_parallel.c ABC_sequential_lib.o
 
 --- run program
 -np <p> number of processes
