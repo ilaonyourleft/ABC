@@ -541,7 +541,7 @@ void getLabelsNonBorderPoints(float **borderPoints, int factor, int *labels, flo
 	float **distancesAndLabels, minDistance;
 	int labelMin;
 
-	distancesAndLabels = calloc(factor, sizeof(int *));
+	distancesAndLabels = calloc(factor, sizeof(float *));
 	if (distancesAndLabels == NULL) {
 		printErrorAllocation();
 	} else {
