@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
 #include "ABC_sequential_lib.h"
 
 int main(int argc, char *argv[]) {
@@ -40,14 +39,8 @@ int main(int argc, char *argv[]) {
     // Number of processes in a communicator
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    MPI_Datatype mpi_double_float_type, mpi_triple_float_type;
-    MPI_Type_contiguous(2, MPI_FLOAT, &mpi_double_float_type);
-    MPI_Type_commit(&mpi_double_float_type);
-    MPI_Type_contiguous(3, MPI_FLOAT, &mpi_triple_float_type);
-    MPI_Type_commit(&mpi_triple_float_type);
-
     // --------------------------------------------------- MEMORY ALLOCATIONS
-    struct double_float *ptrPoints, *ptrKnnPoint, *ptrPointsAll;
+    struct double_float *ptrPoints, *ptrKnnPoint;
     struct triple_float *ptrBorderPointsAll;
     struct point_label *borderPointsAndLabels;
     float *ptrMeanPoint, *ptrDirectionalAnglesPoint;
@@ -55,11 +48,6 @@ int main(int argc, char *argv[]) {
     if (rank == 0) {
         ptrPoints = calloc(N, sizeof(struct double_float));
         if (ptrPoints == NULL) {
-            printErrorAllocation();
-        }
-
-        ptrPointsAll = calloc(N, sizeof(struct double_float));
-        if (ptrPointsAll == NULL) {
             printErrorAllocation();
         }
 
@@ -95,75 +83,27 @@ int main(int argc, char *argv[]) {
             printErrorAllocation();
         }
 
-        memcpy(ptrPointsAll, ptrPoints, N * sizeof(struct double_float));
-    }
+        // --------------------------------------------------- BORDER POINTS LOOP
 
-    // Broadcast the ptrPointsAll array to all processes
-    MPI_Bcast(ptrPointsAll, N, mpi_double_float_type, 0, MPI_COMM_WORLD);
-    
-    if (rank != 0) {
+        // Read data from the input file and create an array of points
         for (i = 0; i < N; i++) {
-            printf("rank: %d, x: %f, y: %f\n", rank, ptrPointsAll[i].x, ptrPointsAll[i].y);
+            // Find k nearest neighbors for each point and the mean point
+            getNeighbors(ptrPoints, ptrPoints[i].x, ptrPoints[i].y, ptrKnnPoint, ptrMeanPoint);
+
+            // Find directional angles between the center, its k nearest neighbors, and the mean point
+            for (j = 0; j < K; j++) {
+                ptrDirectionalAnglesPoint[j] = getDirectionalAngle(ptrPoints[i], ptrMeanPoint, ptrKnnPoint[j]);
+            }
+
+            // Find the border points with enclosing angle for each point and border degree
+            if (isBorderPoint(getEnclosingAngle(ptrDirectionalAnglesPoint)) == 1) {
+                ptrBorderPointsAll[counter].x = ptrPoints[i].x;
+                ptrBorderPointsAll[counter].y = ptrPoints[i].y;
+                ptrBorderPointsAll[counter].z = getBorderDegree(ptrDirectionalAnglesPoint);
+                ++counter;
+            }
         }
-    }
-    
-    int local_n = N / size;
-    int remainder = N % size;
-    int *send_counts = calloc(size, sizeof(int));
-    int *displs = calloc(size, sizeof(int));
-    int displacement = 0;
-    for (int i = 0; i < size; i++) {
-        send_counts[i] = (i < remainder) ? local_n + 1 : local_n;
-        displs[i] = displacement;
-        displacement += send_counts[i];
-    }
-
-    printf("Rank: %d, send_counts: %d, displs: %d\n", rank, send_counts[rank], displs[rank]);
-
-    struct double_float *local_ptrPoints = calloc(send_counts[rank], sizeof(struct double_float));
-    if (local_ptrPoints == NULL) {
-        printErrorAllocation();
-    }
-
-    MPI_Scatterv(ptrPoints, send_counts, displs, mpi_double_float_type, local_ptrPoints, send_counts[rank], mpi_double_float_type, 0, MPI_COMM_WORLD);
-
-    for (int i = 0; i < send_counts[rank]; i++) {
-        printf("Rank %d: %f, %f\n", rank, local_ptrPoints[i].x, local_ptrPoints[i].y);
-    }
-
-    struct triple_float *local_ptrBorderPointsAll = calloc(send_counts[rank], sizeof(struct triple_float));
-    if (local_ptrBorderPointsAll == NULL) {
-        printErrorAllocation();
-    }
-
-    // --------------------------------------------------- BORDER POINTS LOOP
-
-    // Read data from the input file and create an array of points
-    for (i = 0; i < send_counts[rank]; i++) {
-        printf("Rank: %d, x: %f, y: %f\n", rank, local_ptrPoints[i].x, local_ptrPoints[i].y);
-        // Find k nearest neighbors for each point and the mean point
-        getNeighbors(ptrPointsAll, local_ptrPoints[i].x, local_ptrPoints[i].y, ptrKnnPoint, ptrMeanPoint);
-
-        // Find directional angles between the center, its k nearest neighbors, and the mean point
-        for (j = 0; j < K; j++) {
-            ptrDirectionalAnglesPoint[j] = getDirectionalAngle(local_ptrPoints[i], ptrMeanPoint, ptrKnnPoint[j]);
-        }
-
-        // Find the border points with enclosing angle for each point and border degree
-        if (isBorderPoint(getEnclosingAngle(ptrDirectionalAnglesPoint)) == 1) {
-            local_ptrBorderPointsAll[counter].x = local_ptrPoints[i].x;
-            local_ptrBorderPointsAll[counter].y = local_ptrPoints[i].y;
-            local_ptrBorderPointsAll[counter].z = getBorderDegree(ptrDirectionalAnglesPoint);
-            ++counter;
-        }
-    }
-
-    MPI_Gatherv(local_ptrBorderPointsAll, send_counts[rank], mpi_triple_float_type, ptrBorderPointsAll, send_counts, displs, mpi_triple_float_type, 0, MPI_COMM_WORLD);
-
-    free(local_ptrPoints);
-    free(local_ptrBorderPointsAll);
         
-    if (rank == 0) {
         // Free allocated memory
         free(ptrKnnPoint);
         free(ptrMeanPoint);
