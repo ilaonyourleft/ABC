@@ -68,7 +68,7 @@ float euclideanDistance(float x1, float y1, float x2, float y2) {
 /**
  * Sorts an array of distances in ascending order based on the third element. (Bubble sort)
  *
- * @param distancesPoints The array of distances to be sorted.
+ * @param distancesPoints The array of distances to be sorted. Struct of three float elements: x, y, z.
  */
 void sortArrayDistances(struct triple_float *distancesPoints) {
 	float tmp[3];
@@ -93,10 +93,10 @@ void sortArrayDistances(struct triple_float *distancesPoints) {
 /**
  * Get the nearest neighbors of a given point based on Euclidean distances.
  *
- * @param points     The array of points.
+ * @param points     The array of points. Struct of two float elements: x, y.
  * @param x          The x-coordinate of the reference point.
  * @param y          The y-coordinate of the reference point.
- * @param knn        The array to store the nearest neighbors.
+ * @param knn        The array to store the nearest neighbors. Struct of two float elements: x, y.
  * @param meanPoint  The array to store the mean point of the nearest neighbors.
  */
 // non permette di ritornare un array, ma si può ritornare il puntatore all'array specificandone il nome senza indice
@@ -140,9 +140,9 @@ void getNeighbors(struct double_float *points, float x, float y, struct double_f
 /**
  * Calculate the directional angle between the line segments formed by the center, mean point, and neighbor.
  *
- * @param center     The coordinates of the center point.
+ * @param center     The coordinates of the center point. Struct of two float elements: x, y.
  * @param meanPoint  The coordinates of the mean point.
- * @param neighbor   The coordinates of the neighbor point.
+ * @param neighbor   The coordinates of the neighbor point. Struct of two float elements: x, y.
  * @return The directional angle in degrees.
  */
 float getDirectionalAngle(struct double_float center, float *meanPoint, struct double_float neighbor) {
@@ -245,7 +245,7 @@ int isBorderPoint(float enclosingAngle) {
 /**
  * Sort the array of border degrees in descending order based on the third element of each row. (Bubble sort)
  *
- * @param borderDegrees The 2D array of border degrees.
+ * @param borderDegrees The 2D array of border degrees. Struct of three float elements: x, y, z.
  */
 void sortArrayBorderDegrees(struct triple_float *borderDegrees) {
 	float tmp[3];
@@ -270,9 +270,9 @@ void sortArrayBorderDegrees(struct triple_float *borderDegrees) {
 /**
  * Get the border points from the sorted array of border points.
  *
- * @param borderPointsAll The 2D array of border points.
+ * @param borderPointsAll The 2D array of border points. Struct of three float elements: x, y, z.
  * @param sizeArray       The size of the array.
- * @param borderPoints    The 2D array to store the border points.
+ * @param borderPointsAndLabels    The 2D array to store the border points. Struct of three elements: x (float), y (float), label (int).
  */
 void getBorderPoints(struct triple_float *borderPointsAll, int sizeArray, struct point_label *borderPointsAndLabels) {
 	sortArrayBorderDegrees(borderPointsAll);
@@ -315,12 +315,12 @@ float directionAngleModifiedDistanceFunction(float aX, float aY, float bX, float
 /**
  * Perform a region query to find the neighboring points within a specified distance threshold.
  *
- * @param borderPoints The 2D array of border points.
- * @param neighbors    The 2D array to store the neighboring points.
- * @param factor       The number of border points.
- * @param x            The x component of the point to query.
- * @param y            The y component of the point to query.
- * @param epsilon      The distance threshold.
+ * @param borderPointsAndLabels The 2D array of border points. Struct of three elements: x (float), y (float), label (int).
+ * @param neighbors    			The 2D array to store the neighboring points. Struct of three float elements: x, y, z.
+ * @param factor       			The number of border points.
+ * @param x            			The x component of the point to query.
+ * @param y            			The y component of the point to query.
+ * @param epsilon      			The distance threshold.
  * @return The number of neighboring points found.
  */
 int regionQuery(struct point_label *borderPointsAndLabels, struct triple_float *neighbors, int factor, float x, float y, int epsilon) {
@@ -340,9 +340,9 @@ int regionQuery(struct point_label *borderPointsAndLabels, struct triple_float *
 /**
  * Check if a point is already a neighbor in the list of neighbors.
  *
- * @param neighbors    The 2D array of neighbors.
+ * @param neighbors    The 2D array of neighbors. Struct of three float elements: x, y, z.
  * @param lenNeighbors The length of the neighbors array.
- * @param index        The index of the point to check.
+ * @param index        The index of the point to check. Struct of three float elements: x, y, z.
  * @return 1 if the point is already a neighbor, 0 otherwise.
  */
 int checkIfAlreadyNeighbor(struct triple_float *neighbors, int lenNeighbors, struct triple_float index) {
@@ -361,17 +361,16 @@ int checkIfAlreadyNeighbor(struct triple_float *neighbors, int lenNeighbors, str
 /**
  * Grow a cluster by expanding it with neighboring points.
  *
- * @param borderPoints      The 2D array of border points.
- * @param factor            The number of border points.
- * @param labels            The array to store the cluster labels.
- * @param index             The index of the initial point.
- * @param x                 The x component of the initial point.
- * @param y                 The y component of the initial point.
- * @param neighbors         The 2D array of neighboring points.
- * @param lenNeighbors      The length of the neighbors array.
- * @param clusterId         The ID of the cluster.
- * @param epsilon           The distance threshold for neighboring points.
- * @param minNumberPoints   The minimum number of points required to form a cluster.
+ * @param factor            	The number of border points.
+ * @param borderPointsAndLabels	The array to store the cluster labels. Struct of three elements: x (float), y (float), label (int).
+ * @param index             	The index of the initial point.
+ * @param x                 	The x component of the initial point.
+ * @param y                 	The y component of the initial point.
+ * @param neighbors         	The 2D array of neighboring points. Struct of three float elements: x, y, z.
+ * @param lenNeighbors      	The length of the neighbors array.
+ * @param clusterId         	The ID of the cluster.
+ * @param epsilon           	The distance threshold for neighboring points.
+ * @param minNumberPoints   	The minimum number of points required to form a cluster.
  */
 void growCluster(int factor, struct point_label *borderPointsAndLabels, int index, float x, float y, struct triple_float *neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints) {
 	borderPointsAndLabels[index].label = clusterId;
@@ -418,11 +417,10 @@ void growCluster(int factor, struct point_label *borderPointsAndLabels, int inde
 /**
  * Assign cluster labels to the border points based on density connectivity.
  *
- * @param borderPoints      The 2D array of border points.
- * @param factor            The number of border points.
- * @param epsilon           The distance threshold for neighboring points.
- * @param minNumberPoints   The minimum number of points required to form a cluster.
- * @param labels            The array to store the cluster labels.
+ * @param factor            	The number of border points.
+ * @param epsilon           	The distance threshold for neighboring points.
+ * @param minNumberPoints   	The minimum number of points required to form a cluster.
+ * @param borderPointsAndLabels	The array to store the cluster labels. Struct of three elements: x (float), y (float), label (int).
  */
 void getLabelsBorderPoints(int factor, int epsilon, int minNumberPoints, struct point_label *borderPointsAndLabels) {
 	int clusterId = 0, i, j;
@@ -460,10 +458,10 @@ void getLabelsBorderPoints(int factor, int epsilon, int minNumberPoints, struct 
 /**
  * Check if a point is a border point.
  *
- * @param borderPoints    The 2D array of border points.
- * @param factor          The number of border points.
- * @param x               The x component of the point to check.
- * @param y               The y component of the point to check.
+ * @param borderPointsAndLabels	The 2D array of border points. Struct of three elements: x (float), y (float), label (int).
+ * @param factor          		The number of border points.
+ * @param x               		The x component of the point to check.
+ * @param y               		The y component of the point to check.
  * @return 1 if the point is a border point, 0 otherwise.
  */
 int checkIfBorderPoint(struct point_label *borderPointsAndLabels, int factor, float x, float y) {
@@ -478,10 +476,10 @@ int checkIfBorderPoint(struct point_label *borderPointsAndLabels, int factor, fl
 /**
  * Get the non-border points from the given points array.
  *
- * @param points            The 2D array of points.
- * @param borderPoints      The 2D array of border points.
- * @param factor            The number of border points.
- * @param nonBorderPoints   The 2D array to store the non-border points.
+ * @param points            		The 2D array of points. Struct of two float elements: x, y.
+ * @param borderPointsAndLabels		The 2D array of border points. Struct of three elements: x (float), y (float), label (int).
+ * @param factor            		The number of border points.
+ * @param internalPointsAndLabels	The 2D array to store the non-border points. Struct of three elements: x (float), y (float), label (int).
  */
 void getNonBorderPoints(struct double_float *points, struct point_label *borderPointsAndLabels, int factor, struct point_label *internalPointsAndLabels) {
 	int counter = 0;
@@ -497,7 +495,7 @@ void getNonBorderPoints(struct double_float *points, struct point_label *borderP
 /**
  * Find the minimum distance from the given distances array.
  *
- * @param distances   The 2D array of distances.
+ * @param distances   The 2D array of distances. Struct of two float elements: x, y.
  * @param factor      The number of distances.
  * @return The minimum distance found.
  */
@@ -518,12 +516,10 @@ float findMinimumDistance(struct double_float *distances, int factor) {
 /**
  * Assign cluster labels to the non-border points based on distance and labels of border points.
  *
- * @param borderPoints        The 2D array of border points.
- * @param factor              The number of border points.
- * @param labels              The array of cluster labels for border points.
- * @param nonBorderPoints     The 2D array of non-border points.
- * @param otherFactor         The number of non-border points.
- * @param nonBorderLabels     The array to store the cluster labels for non-border points.
+ * @param factor              		The number of border points.
+ * @param borderPointsAndLabels		The array of cluster labels for border points. Struct of three elements: x (float), y (float), label (int).
+ * @param internalPointsAndLabels	The 2D array of non-border points. Struct of three elements: x (float), y (float), label (int).
+ * @param otherFactor         		The number of non-border points.
  */
 void getLabelsNonBorderPoints(int factor, struct point_label *borderPointsAndLabels, struct point_label *internalPointsAndLabels, int otherFactor) {
 	float minDistance;
