@@ -1,7 +1,6 @@
 /*
  * ABC_sequential.h
  *
- *  Created on: 25 giu 2022
  *      Author: ilaria
  */
 
@@ -16,32 +15,50 @@
 #define M_PI 3.14159265358979323846
 #endif // M_PI
 
+struct point_label {
+    float x;
+    float y;
+    int label;
+};
+
+struct double_float {
+    float x;
+    float y;
+};
+
+struct triple_float {
+    float x;
+    float y;
+    float z;
+};
+
 // MISCELLANEOUS
 void printErrorAllocation();
 
 // KNN methods
 float euclideanDistance(float x1, float y1, float x2, float y2);
-void sortArrayDistances(float **distancesPoints);
-void getNeighbors(float **points, float x, float y, float **knn, float *meanPoint);
+void sortArrayDistances(struct triple_float *distancesPoints);
+void getNeighbors(struct double_float *points, float x, float y, struct double_float *knn, float *meanPoint);
 
 // ENCLOSING ANGLES
-float getDirectionalAngle(float *center, float *meanPoint, float *neighbor);
+float getDirectionalAngle(struct double_float center, float *meanPoint, struct double_float neighbor);
 int findSize(float *directionalAngles);
 float getEnclosingAngle(float *directionalAngles);
 float getBorderDegree(float *directionalAngles);
 int isBorderPoint(float enclosingAngle);
-void sortArrayBorderDegrees(float *borderDegrees);
-void getBorderPoints(float **borderPointsAll, int sizeArray, float **borderPoints);
+void sortArrayBorderDegrees(struct triple_float *borderDegrees);
+void getBorderPoints(struct triple_float *borderPointsAll, int sizeArray, struct point_label *borderPointsAndLabels);
 
 // DBSCAN
 float moduleVector(float x, float y);
 float directionAngleModifiedDistanceFunction(float aX, float aY, float bX, float bY);
-int regionQuery(float **borderPoints, float **neighbors, int factor, float x, float y, int epsilon);
-void growCluster(float **borderPoints, int factor, int *labels, int index, float x, float y, float **neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints);
-void getLabelsBorderPoints(float **borderPoints, int factor, int epsilon, int minNumberPoints, int *labels);
+int regionQuery(struct point_label *borderPointsAndLabels, struct triple_float *neighbors, int factor, float x, float y, int epsilon);
+int checkIfAlreadyNeighbor(struct triple_float *neighbors, int lenNeighbors, struct triple_float index);
+void growCluster(int factor, struct point_label *borderPointsAndLabels, int index, float x, float y, struct triple_float *neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints);
+void getLabelsBorderPoints(int factor, int epsilon, int minNumberPoints, struct point_label *borderPointsAndLabels);
 
 // CLUSTER
-int checkIfBorderPoint(float **borderPoints, int factor, float x, float y);
-void getNonBorderPoints(float **points, float **borderPoints, int factor, float **nonBorderPoints);
-float findMinimumDistance(float **distances, int factor);
-void getLabelsNonBorderPoints(float **borderPoints, int factor, int *labels, float **nonBorderPoints, int otherFactor, int *nonBorderLabels);
+int checkIfBorderPoint(struct point_label *borderPointsAndLabels, int factor, float x, float y);
+void getNonBorderPoints(struct double_float *points, struct point_label *borderPointsAndLabels, int factor, struct point_label *internalPointsAndLabels);
+float findMinimumDistance(struct double_float *distances, int factor);
+void getLabelsNonBorderPoints(int factor, struct point_label *borderPointsAndLabels, struct point_label *internalPointsAndLabels, int otherFactor);

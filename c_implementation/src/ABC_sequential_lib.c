@@ -1,7 +1,6 @@
 /*
  * ABC_sequential.h
  *
- *  Created on: 25 giu 2022
  *      Author: ilaria
  */
 
@@ -23,6 +22,23 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif // M_PI
+
+struct point_label {
+    float x;
+    float y;
+    int label;
+};
+
+struct double_float {
+    float x;
+    float y;
+};
+
+struct triple_float {
+    float x;
+    float y;
+    float z;
+};
 
 // MISCELLANEOUS
 
@@ -54,21 +70,21 @@ float euclideanDistance(float x1, float y1, float x2, float y2) {
  *
  * @param distancesPoints The array of distances to be sorted.
  */
-void sortArrayDistances(float **distancesPoints) {
+void sortArrayDistances(struct triple_float *distancesPoints) {
 	float tmp[3];
 
 	for (int i = 0; i < N-1; i++) {
 		for (int j = i + 1; j < N; j++) {
-			if (distancesPoints[i][2] > distancesPoints[j][2]) {
-				tmp[0] = distancesPoints[i][0];
-				tmp[1] = distancesPoints[i][1];
-				tmp[2] = distancesPoints[i][2];
-				distancesPoints[i][0] = distancesPoints[j][0];
-				distancesPoints[j][0] = tmp[0];
-				distancesPoints[i][1] = distancesPoints[j][1];
-				distancesPoints[j][1] = tmp[1];
-				distancesPoints[i][2] = distancesPoints[j][2];
-				distancesPoints[j][2] = tmp[2];
+			if (distancesPoints[i].z > distancesPoints[j].z) {
+				tmp[0] = distancesPoints[i].x;
+				tmp[1] = distancesPoints[i].y;
+				tmp[2] = distancesPoints[i].z;
+				distancesPoints[i].x = distancesPoints[j].x;
+				distancesPoints[j].x = tmp[0];
+				distancesPoints[i].y = distancesPoints[j].y;
+				distancesPoints[j].y = tmp[1];
+				distancesPoints[i].z = distancesPoints[j].z;
+				distancesPoints[j].z = tmp[2];
 			}
 		}
 	}
@@ -84,47 +100,35 @@ void sortArrayDistances(float **distancesPoints) {
  * @param meanPoint  The array to store the mean point of the nearest neighbors.
  */
 // non permette di ritornare un array, ma si può ritornare il puntatore all'array specificandone il nome senza indice
-void getNeighbors(float **points, float x, float y, float **knn, float *meanPoint) {
+void getNeighbors(struct double_float *points, float x, float y, struct double_float *knn, float *meanPoint) {
 	// non ritorna l'indirizzo di una variabile locale all'esterno della funzione, quindi serve static nella definizione della variabile locale
-	float **distances;
 	float tmp_x = 0.00, tmp_y = 0.00;
-	int i, j;
+	int i;
 
-	distances = calloc(N, sizeof(float *));
+	struct triple_float *distances = calloc(N, sizeof(struct triple_float));
 	if (distances == NULL) {
 		printErrorAllocation();
-	} else {
-		for (int i = 0; i < N; i++) {
-			distances[i] = calloc(3, sizeof(float));
-			if (distances[i] == NULL) {
-				printErrorAllocation();
-			}
-		}
 	}
 
 	for (i = 0; i < N; i++) {
-		float distance = euclideanDistance(x, y, points[i][0], points[i][1]);
-		for (j = 0; j < 3; j++) {
-			if (j != 2) {
-				distances[i][j] = points[i][j];
-			} else {
-				distances[i][j] = distance;
-			}
-		}
+		float distance = euclideanDistance(x, y, points[i].x, points[i].y);
+		distances[i].x = points[i].x;
+		distances[i].y = points[i].y;
+		distances[i].z = distance;
 	}
 
 	sortArrayDistances(distances);
 
 	for (i = 0; i < K; i++) {
-		knn[i][0] = distances[i+1][0];
-		knn[i][1] = distances[i+1][1];
+		knn[i].x = distances[i+1].x;
+		knn[i].y = distances[i+1].y;
 	}
 
 	free(distances);
 
 	for (i = 0; i < K; i++) {
-		tmp_x += knn[i][0];
-		tmp_y += knn[i][1];
+		tmp_x += knn[i].x;
+		tmp_y += knn[i].y;
 	}
 
 	meanPoint[0] = tmp_x / K;
@@ -141,16 +145,16 @@ void getNeighbors(float **points, float x, float y, float **knn, float *meanPoin
  * @param neighbor   The coordinates of the neighbor point.
  * @return The directional angle in degrees.
  */
-float getDirectionalAngle(float *center, float *meanPoint, float *neighbor) {
+float getDirectionalAngle(struct double_float center, float *meanPoint, struct double_float neighbor) {
 	float uX = 0.00, uY = 0.00, vX = 0.00, vY = 0.00, directionalAngle = 0.00, directionalAngleDegree = 0.00;
 
 	// mean point - center
-	uX = meanPoint[0] - center[0];
-	uY = meanPoint[1] - center[1];
+	uX = meanPoint[0] - center.x;
+	uY = meanPoint[1] - center.y;
 
 	// neighbor - center
-	vX = neighbor[0] - center[0];
-	vY = neighbor[1] - center[1];
+	vX = neighbor.x - center.x;
+	vY = neighbor.y - center.y;
 
 	directionalAngle = atan2(vY, vX) - atan2(uY, uX);
 	directionalAngleDegree = directionalAngle * (180 / M_PI);
@@ -243,21 +247,21 @@ int isBorderPoint(float enclosingAngle) {
  *
  * @param borderDegrees The 2D array of border degrees.
  */
-void sortArrayBorderDegrees(float **borderDegrees) {
+void sortArrayBorderDegrees(struct triple_float *borderDegrees) {
 	float tmp[3];
 
 	for (int i = 0; i < N-1; i++) {
 		for (int j = i + 1; j < N; j++) {
-			if (borderDegrees[i][2] < borderDegrees[j][2]) {
-				tmp[0] = borderDegrees[i][0];
-				tmp[1] = borderDegrees[i][1];
-				tmp[2] = borderDegrees[i][2];
-				borderDegrees[i][0] = borderDegrees[j][0];
-				borderDegrees[j][0] = tmp[0];
-				borderDegrees[i][1] = borderDegrees[j][1];
-				borderDegrees[j][1] = tmp[1];
-				borderDegrees[i][2] = borderDegrees[j][2];
-				borderDegrees[j][2] = tmp[2];
+			if (borderDegrees[i].z < borderDegrees[j].z) {
+				tmp[0] = borderDegrees[i].x;
+				tmp[1] = borderDegrees[i].y;
+				tmp[2] = borderDegrees[i].z;
+				borderDegrees[i].x = borderDegrees[j].x;
+				borderDegrees[j].x = tmp[0];
+				borderDegrees[i].y = borderDegrees[j].y;
+				borderDegrees[j].y = tmp[1];
+				borderDegrees[i].z = borderDegrees[j].z;
+				borderDegrees[j].z = tmp[2];
 			}
 		}
 	}
@@ -270,11 +274,11 @@ void sortArrayBorderDegrees(float **borderDegrees) {
  * @param sizeArray       The size of the array.
  * @param borderPoints    The 2D array to store the border points.
  */
-void getBorderPoints(float **borderPointsAll, int sizeArray, float **borderPoints) {
+void getBorderPoints(struct triple_float *borderPointsAll, int sizeArray, struct point_label *borderPointsAndLabels) {
 	sortArrayBorderDegrees(borderPointsAll);
 	for (int i = 0; i < sizeArray; i++) {
-		borderPoints[i][0] = borderPointsAll[i][0];
-		borderPoints[i][1] = borderPointsAll[i][1];
+		borderPointsAndLabels[i].x = borderPointsAll[i].x;
+		borderPointsAndLabels[i].y = borderPointsAll[i].y;
 	}
 }
 
@@ -319,14 +323,14 @@ float directionAngleModifiedDistanceFunction(float aX, float aY, float bX, float
  * @param epsilon      The distance threshold.
  * @return The number of neighboring points found.
  */
-int regionQuery(float **borderPoints, float **neighbors, int factor, float x, float y, int epsilon) {
+int regionQuery(struct point_label *borderPointsAndLabels, struct triple_float *neighbors, int factor, float x, float y, int epsilon) {
 	int counter = 0;
 	for (int i = 0; i < factor; i++) {
-		float disComputed = directionAngleModifiedDistanceFunction(x, y, borderPoints[i][0], borderPoints[i][1]);
+		float disComputed = directionAngleModifiedDistanceFunction(x, y, borderPointsAndLabels[i].x, borderPointsAndLabels[i].y);
 		if (disComputed < epsilon) {
-			neighbors[counter][0] = i;
-			neighbors[counter][1] = borderPoints[i][0];
-			neighbors[counter][2] = borderPoints[i][1];
+			neighbors[counter].x = i;
+			neighbors[counter].y = borderPointsAndLabels[i].x;
+			neighbors[counter].z = borderPointsAndLabels[i].y;
 			++counter;
 		}
 	}
@@ -341,11 +345,11 @@ int regionQuery(float **borderPoints, float **neighbors, int factor, float x, fl
  * @param index        The index of the point to check.
  * @return 1 if the point is already a neighbor, 0 otherwise.
  */
-int checkIfAlreadyNeighbor(float **neighbors, int lenNeighbors, float *index) {
+int checkIfAlreadyNeighbor(struct triple_float *neighbors, int lenNeighbors, struct triple_float index) {
 	int flag = 0;
 	for (int i = 0; i < lenNeighbors; i++) {
-		if (neighbors[i][0] >= 0) {
-			if (neighbors[i][1] == index[1] && neighbors[i][2] == index[2]) {
+		if (neighbors[i].x >= 0) {
+			if (neighbors[i].y == index.y && neighbors[i].z == index.z) {
 				flag = 1;
 				break;
 			}
@@ -369,45 +373,37 @@ int checkIfAlreadyNeighbor(float **neighbors, int lenNeighbors, float *index) {
  * @param epsilon           The distance threshold for neighboring points.
  * @param minNumberPoints   The minimum number of points required to form a cluster.
  */
-void growCluster(float **borderPoints, int factor, int *labels, int index, float x, float y, float **neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints) {
-	labels[index] = clusterId;
+void growCluster(int factor, struct point_label *borderPointsAndLabels, int index, float x, float y, struct triple_float *neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints) {
+	borderPointsAndLabels[index].label = clusterId;
 	int counter = 0, i, j, neighborsIncrement;
-	float **ptrNextNeighbors;
 
-	ptrNextNeighbors = calloc(factor, sizeof(float *));
+	struct triple_float *ptrNextNeighbors = calloc(factor, sizeof(struct triple_float));
 	if (ptrNextNeighbors == NULL) {
 		printErrorAllocation();
-	} else {
-		for (i = 0; i < factor; i++) {
-			ptrNextNeighbors[i] = calloc(3, sizeof(float));
-			if (ptrNextNeighbors[i] == NULL) {
-				printErrorAllocation();
-			}
-		}
 	}
 
 	while (counter < lenNeighbors) {
 		int lenNextNeighbors = 0;
 		if (counter != 0) {
 			for (j = 0; j < factor; j++) {
-				ptrNextNeighbors[j][0] = 0;
-				ptrNextNeighbors[j][1] = 0;
-				ptrNextNeighbors[j][2] = 0;
+				ptrNextNeighbors[j].x = 0;
+				ptrNextNeighbors[j].y = 0;
+				ptrNextNeighbors[j].z = 0;
 			}
 		}
-		int next_index = neighbors[counter][0];
-		if (labels[next_index] == -1) {
-			labels[next_index] = clusterId;
-		} else if (labels[next_index] == 0) {
-			labels[next_index] = clusterId;
-			lenNextNeighbors = regionQuery(borderPoints, ptrNextNeighbors, factor, borderPoints[next_index][0], borderPoints[next_index][1], epsilon);
+		int next_index = neighbors[counter].x;
+		if (borderPointsAndLabels[next_index].label == -1) {
+			borderPointsAndLabels[next_index].label = clusterId;
+		} else if (borderPointsAndLabels[next_index].label == 0) {
+			borderPointsAndLabels[next_index].label = clusterId;
+			lenNextNeighbors = regionQuery(borderPointsAndLabels, ptrNextNeighbors, factor, borderPointsAndLabels[next_index].x, borderPointsAndLabels[next_index].y, epsilon);
 			if (lenNextNeighbors >= minNumberPoints) {
 				neighborsIncrement = 0;
 				for (i = 0; i < lenNextNeighbors; i++) {
 					if (checkIfAlreadyNeighbor(neighbors, lenNeighbors, ptrNextNeighbors[i]) == 0) {
-						neighbors[lenNeighbors + neighborsIncrement][0] = ptrNextNeighbors[i][0];
-						neighbors[lenNeighbors + neighborsIncrement][1] = ptrNextNeighbors[i][1];
-						neighbors[lenNeighbors + neighborsIncrement][2] = ptrNextNeighbors[i][2];
+						neighbors[lenNeighbors + neighborsIncrement].x = ptrNextNeighbors[i].x;
+						neighbors[lenNeighbors + neighborsIncrement].y = ptrNextNeighbors[i].y;
+						neighbors[lenNeighbors + neighborsIncrement].z = ptrNextNeighbors[i].z;
 						++lenNeighbors;
 						++neighborsIncrement;
 					}
@@ -428,38 +424,30 @@ void growCluster(float **borderPoints, int factor, int *labels, int index, float
  * @param minNumberPoints   The minimum number of points required to form a cluster.
  * @param labels            The array to store the cluster labels.
  */
-void getLabelsBorderPoints(float **borderPoints, int factor, int epsilon, int minNumberPoints, int *labels) {
+void getLabelsBorderPoints(int factor, int epsilon, int minNumberPoints, struct point_label *borderPointsAndLabels) {
 	int clusterId = 0, i, j;
-	float **ptrNeighbors;
 
-	ptrNeighbors = calloc(factor, sizeof(float *));
+	struct triple_float *ptrNeighbors = calloc(factor, sizeof(struct triple_float));
 	if (ptrNeighbors == NULL) {
 		printErrorAllocation();
-	} else {
-		for (i = 0; i < factor; i++) {
-			ptrNeighbors[i] = calloc(3, sizeof(float));
-			if (ptrNeighbors[i] == NULL) {
-				printErrorAllocation();
-			}
-		}
 	}
 
 	for (i = 0; i < factor; i++) {
 		int lenNeighbors = 0;
 		if (i != 0) {
 			for (j = 0; j < factor; j++) {
-				ptrNeighbors[j][0] = 0;
-				ptrNeighbors[j][1] = 0;
-				ptrNeighbors[j][2] = 0;
+				ptrNeighbors[j].x = 0;
+				ptrNeighbors[j].y = 0;
+				ptrNeighbors[j].z = 0;
 			}
 		}
-		if (labels[i] == 0) {
-			lenNeighbors = regionQuery(borderPoints, ptrNeighbors, factor, borderPoints[i][0], borderPoints[i][1], epsilon);
+		if (borderPointsAndLabels[i].label == 0) {
+			lenNeighbors = regionQuery(borderPointsAndLabels, ptrNeighbors, factor, borderPointsAndLabels[i].x, borderPointsAndLabels[i].y, epsilon);
 			if (lenNeighbors < minNumberPoints) {
-				labels[i] = -1;
+				borderPointsAndLabels[i].label = -1;
 			} else {
 				++clusterId;
-				growCluster(borderPoints, factor, labels, i, borderPoints[i][0], borderPoints[i][1], ptrNeighbors, lenNeighbors, clusterId, epsilon, minNumberPoints);
+				growCluster(factor, borderPointsAndLabels, i, borderPointsAndLabels[i].x, borderPointsAndLabels[i].y, ptrNeighbors, lenNeighbors, clusterId, epsilon, minNumberPoints);
 			}
 		}
 	}
@@ -478,9 +466,9 @@ void getLabelsBorderPoints(float **borderPoints, int factor, int epsilon, int mi
  * @param y               The y component of the point to check.
  * @return 1 if the point is a border point, 0 otherwise.
  */
-int checkIfBorderPoint(float **borderPoints, int factor, float x, float y) {
+int checkIfBorderPoint(struct point_label *borderPointsAndLabels, int factor, float x, float y) {
 	for (int i = 0; i < factor; i++) {
-		if (borderPoints[i][0] == x && borderPoints[i][1] == y) {
+		if (borderPointsAndLabels[i].x == x && borderPointsAndLabels[i].y == y) {
 			return 1;
 		}
 	}
@@ -495,12 +483,12 @@ int checkIfBorderPoint(float **borderPoints, int factor, float x, float y) {
  * @param factor            The number of border points.
  * @param nonBorderPoints   The 2D array to store the non-border points.
  */
-void getNonBorderPoints(float **points, float **borderPoints, int factor, float **nonBorderPoints) {
+void getNonBorderPoints(struct double_float *points, struct point_label *borderPointsAndLabels, int factor, struct point_label *internalPointsAndLabels) {
 	int counter = 0;
 	for (int i = 0; i < N; i++) {
-		if (checkIfBorderPoint(borderPoints, factor, points[i][0], points[i][1]) == 0) {
-			nonBorderPoints[counter][0] = points[i][0];
-			nonBorderPoints[counter][1] = points[i][1];
+		if (checkIfBorderPoint(borderPointsAndLabels, factor, points[i].x, points[i].y) == 0) {
+			internalPointsAndLabels[counter].x = points[i].x;
+			internalPointsAndLabels[counter].y = points[i].y;
 			++counter;
 		}
 	}
@@ -513,14 +501,14 @@ void getNonBorderPoints(float **points, float **borderPoints, int factor, float 
  * @param factor      The number of distances.
  * @return The minimum distance found.
  */
-float findMinimumDistance(float **distances, int factor) {
+float findMinimumDistance(struct double_float *distances, int factor) {
 	float minimumDistance = 0.0;
 	for (int i = 0; i < factor; i++) {
 		if (i == 0) {
-			minimumDistance = distances[i][0];
+			minimumDistance = distances[i].x;
 		} else {
-			if (minimumDistance > distances[i][0] && distances[i][0] != 0.00) {
-				minimumDistance = distances[i][0];
+			if (minimumDistance > distances[i].x && distances[i].x != 0.00) {
+				minimumDistance = distances[i].x;
 			}
 		}
 	}
@@ -537,20 +525,13 @@ float findMinimumDistance(float **distances, int factor) {
  * @param otherFactor         The number of non-border points.
  * @param nonBorderLabels     The array to store the cluster labels for non-border points.
  */
-void getLabelsNonBorderPoints(float **borderPoints, int factor, int *labels, float **nonBorderPoints, int otherFactor, int *nonBorderLabels) {
-	float **distancesAndLabels, minDistance;
+void getLabelsNonBorderPoints(int factor, struct point_label *borderPointsAndLabels, struct point_label *internalPointsAndLabels, int otherFactor) {
+	float minDistance;
 	int labelMin;
 
-	distancesAndLabels = calloc(factor, sizeof(float *));
+	struct double_float *distancesAndLabels = calloc(factor, sizeof(struct double_float));
 	if (distancesAndLabels == NULL) {
 		printErrorAllocation();
-	} else {
-		for (int k = 0; k < factor; k++) {
-			distancesAndLabels[k] = calloc(2, sizeof(float));
-			if (distancesAndLabels[k] == NULL) {
-				printErrorAllocation();
-			}
-		}
 	}
 
 	for (int i = 0; i < otherFactor; i++) {
@@ -558,24 +539,24 @@ void getLabelsNonBorderPoints(float **borderPoints, int factor, int *labels, flo
 		labelMin = 0;
 		if (i != 0) {
 			for (int h = 0; h < factor; h++) {
-				distancesAndLabels[h][0] = 0;
-				distancesAndLabels[h][1] = 0;
+				distancesAndLabels[h].x = 0;
+				distancesAndLabels[h].y = 0;
 			}
 		}
 		for (int j = 0; j < factor; j++) {
-			if (labels[j] != -1) {
-				distancesAndLabels[j][0] = directionAngleModifiedDistanceFunction(nonBorderPoints[i][0], nonBorderPoints[i][1], borderPoints[j][0], borderPoints[j][1]);
-				distancesAndLabels[j][1] = labels[j];
+			if (borderPointsAndLabels[j].label != -1) {
+				distancesAndLabels[j].x = directionAngleModifiedDistanceFunction(internalPointsAndLabels[i].x, internalPointsAndLabels[i].y, borderPointsAndLabels[j].x, borderPointsAndLabels[j].y);
+				distancesAndLabels[j].y = borderPointsAndLabels[j].label;
 			}
 		}
 		minDistance = findMinimumDistance(distancesAndLabels, factor);
 		for (int k = 0; k < factor; k++) {
-			if ((minDistance == distancesAndLabels[k][0]) && (distancesAndLabels[k][1] != -1)) {
-				labelMin = distancesAndLabels[k][1];
+			if ((minDistance == distancesAndLabels[k].x) && (distancesAndLabels[k].y != -1)) {
+				labelMin = distancesAndLabels[k].y;
 				break;
 			}
 		}
-		nonBorderLabels[i] = labelMin;
+		internalPointsAndLabels[i].label = labelMin;
 	}
 
 	free(distancesAndLabels);
