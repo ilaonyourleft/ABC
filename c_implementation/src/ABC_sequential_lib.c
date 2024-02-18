@@ -66,11 +66,100 @@ float euclideanDistance(float x1, float y1, float x2, float y2) {
 }
 
 /**
- * Sorts an array of distances in ascending order based on the third element. (Bubble sort)
+ * This function swaps the values of two triple_float structures, a and b.
+ * 
+ * @param a Pointer to the first triple_float structure.
+ * @param b Pointer to the second triple_float structure.
+ */
+void swap(struct triple_float *a, struct triple_float *b) {
+    struct triple_float tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+/**
+ * This function partitions the array of distance points for the quicksort algorithm based on the pivot element.
+ * 
+ * @param distancesPoints Pointer to the array of distance points.
+ * @param low The index of the first element in the array.
+ * @param high The index of the last element in the array.
+ * @return The index of the pivot element after partitioning.
+ */
+int partitionDistances(struct triple_float *distancesPoints, int low, int high) {
+    float pivot = distancesPoints[high].z;
+    int i = (low - 1);
+
+    for (int j = low; j <= high - 1; j++) {
+        if (distancesPoints[j].z < pivot) {
+            i++;
+            swap(&distancesPoints[i], &distancesPoints[j]);
+        }
+    }
+    swap(&distancesPoints[i + 1], &distancesPoints[high]);
+    return (i + 1);
+}
+
+/**
+ * This function partitions the array of degree points for the quicksort algorithm based on the pivot element.
+ * 
+ * @param borderDegrees Pointer to the array of degree points.
+ * @param low The index of the first element in the array.
+ * @param high The index of the last element in the array.
+ * @return The index of the pivot element after partitioning.
+ */
+int partitionDegrees(struct triple_float *borderDegrees, int low, int high) {
+    float pivot = borderDegrees[high].z;
+    int i = (low - 1);
+
+    for (int j = low; j <= high - 1; j++) {
+        if (borderDegrees[j].z > pivot) {
+            i++;
+            swap(&borderDegrees[i], &borderDegrees[j]);
+        }
+    }
+    swap(&borderDegrees[i + 1], &borderDegrees[high]);
+    return (i + 1);
+}
+
+/**
+ * This function sorts an array of triple_float structures using the quicksort algorithm based on the specified flag.
+ * 
+ * @param arrays Pointer to the array of triple_float structures.
+ * @param low The index of the first element in the array.
+ * @param high The index of the last element in the array.
+ * @param flag The flag to determine whether to sort distances (flag=0) or degrees (flag=1).
+ */
+void quicksort(struct triple_float *arrays, int low, int high, int flag) {
+	int pi = 0;
+    if (low < high) {
+		if (flag == 0) {
+			// distances
+			pi = partitionDistances(arrays, low, high);
+		} else if (flag == 1) {
+			// degrees
+			pi = partitionDegrees(arrays, low, high);
+		}
+		
+        quicksort(arrays, low, pi - 1, flag);
+        quicksort(arrays, pi + 1, high, flag);
+    }
+}
+
+/**
+ * Sorts an array of distances in ascending order based on the third element. (Quicksort)
  *
  * @param distancesPoints The array of distances to be sorted. Struct of three float elements: x, y, z.
  */
 void sortArrayDistances(struct triple_float *distancesPoints) {
+    quicksort(distancesPoints, 0, N - 1, 0);
+}
+
+/**
+ * Sorts an array of distances in ascending order based on the third element. (Bubble sort)
+ *
+ * @param distancesPoints The array of distances to be sorted. Struct of three float elements: x, y, z.
+ */
+/*void sortArrayDistances(struct triple_float *distancesPoints) {
 	float tmp[3];
 
 	for (int i = 0; i < N-1; i++) {
@@ -88,7 +177,7 @@ void sortArrayDistances(struct triple_float *distancesPoints) {
 			}
 		}
 	}
-}
+}*/
 
 /**
  * Get the nearest neighbors of a given point based on Euclidean distances.
@@ -243,11 +332,20 @@ int isBorderPoint(float enclosingAngle) {
 }
 
 /**
- * Sort the array of border degrees in descending order based on the third element of each row. (Bubble sort)
+ * Sort the array of border degrees in descending order based on the third element of each row. (Quicksort)
  *
  * @param borderDegrees The 2D array of border degrees. Struct of three float elements: x, y, z.
  */
 void sortArrayBorderDegrees(struct triple_float *borderDegrees) {
+    quicksort(borderDegrees, 0, N - 1, 1);
+}
+
+/**
+ * Sort the array of border degrees in descending order based on the third element of each row. (Bubble sort)
+ *
+ * @param borderDegrees The 2D array of border degrees. Struct of three float elements: x, y, z.
+ */
+/*void sortArrayBorderDegrees(struct triple_float *borderDegrees) {
 	float tmp[3];
 
 	for (int i = 0; i < N-1; i++) {
@@ -265,7 +363,7 @@ void sortArrayBorderDegrees(struct triple_float *borderDegrees) {
 			}
 		}
 	}
-}
+}*/
 
 /**
  * Get the border points from the sorted array of border points.

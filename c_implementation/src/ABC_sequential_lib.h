@@ -37,6 +37,10 @@ void printErrorAllocation();
 
 // KNN methods
 float euclideanDistance(float x1, float y1, float x2, float y2);
+void swap(struct triple_float *a, struct triple_float *b);
+int partitionDistances(struct triple_float *distancesPoints, int low, int high);
+int partitionDegrees(struct triple_float *borderDegrees, int low, int high);
+void quicksort(struct triple_float *arrays, int low, int high, int flag);
 void sortArrayDistances(struct triple_float *distancesPoints);
 void getNeighbors(struct double_float *points, float x, float y, struct double_float *knn, float *meanPoint);
 
