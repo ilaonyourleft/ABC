@@ -1,3 +1,0 @@
-Process 1, localFactor = 15, localOtherFactor = 151
-Process 0, localFactor = 2, localOtherFactor = 0
-CIAO!CIAO!CIAO!CIAO!CIAO!CIAO!

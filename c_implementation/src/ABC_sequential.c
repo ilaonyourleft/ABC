@@ -35,16 +35,6 @@ int main(int argc, char *argv[]) {
 		printErrorAllocation();
 	}
 
-	float *ptrEnclosingAnglesPoint = calloc(K, sizeof(float));
-	if (ptrEnclosingAnglesPoint == NULL) {
-		printErrorAllocation();
-	}
-
-	float *ptrBorderDegreesPoint = calloc(K, sizeof(float));
-	if (ptrBorderDegreesPoint == NULL) {
-		printErrorAllocation();
-	}
-
 	struct double_float *ptrKnnPoint = calloc(K, sizeof(struct double_float));
 	if (ptrKnnPoint == NULL) {
 		printErrorAllocation();
@@ -99,8 +89,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Free allocated memory
-	free(ptrEnclosingAnglesPoint);
-	free(ptrBorderDegreesPoint);
 	free(ptrKnnPoint);
 	free(ptrMeanPoint);
 	free(ptrDirectionalAnglesPoint);
