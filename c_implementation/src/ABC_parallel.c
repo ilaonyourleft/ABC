@@ -39,32 +39,56 @@ int main(int argc, char *argv[]) {
     // Number of processes in a communicator
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+    MPI_Datatype mpi_double_float_type, mpi_triple_float_type;
+    MPI_Type_contiguous(2, MPI_FLOAT, &mpi_double_float_type);
+    MPI_Type_commit(&mpi_double_float_type);
+    MPI_Type_contiguous(3, MPI_FLOAT, &mpi_triple_float_type);
+    MPI_Type_commit(&mpi_triple_float_type);
+
+    int chunkSize = N / size;
+    int start = rank * chunkSize;
+    int end = (rank == size - 1) ? N : start + chunkSize;
+    int remainder = N % size;
+
     // --------------------------------------------------- MEMORY ALLOCATIONS
-    struct double_float *ptrPoints, *ptrKnnPoint;
+    struct double_float *ptrPoints;
     struct triple_float *ptrBorderPointsAll;
     struct point_label *borderPointsAndLabels;
-    float *ptrMeanPoint, *ptrDirectionalAnglesPoint;
+
+    ptrPoints = calloc(N, sizeof(struct double_float));
+    if (ptrPoints == NULL) {
+        printErrorAllocation();
+    }
+
+    int *displs = calloc(size, sizeof(int));
+    if (displs == NULL) {
+        printErrorAllocation();
+    }
+
+    int *counts = calloc(size, sizeof(int));
+    if (counts == NULL) {
+        printErrorAllocation();
+    }
+
+    int local_N = 0;
+    if (rank < remainder) {
+        local_N = chunkSize + 1;
+    } else {
+        local_N = chunkSize;
+    }
+
+    int displacement = 0;
+    for (int h = 0; h < size; h++) {
+        counts[h] = (h < remainder) ? (chunkSize + 1) : chunkSize;
+        displs[h] = displacement;
+        displacement += counts[h];
+    }
 
     if (rank == 0) {
-        ptrPoints = calloc(N, sizeof(struct double_float));
+        /*ptrPoints = calloc(N, sizeof(struct double_float));
         if (ptrPoints == NULL) {
             printErrorAllocation();
-        }
-
-        ptrKnnPoint = calloc(K, sizeof(struct double_float));
-        if (ptrKnnPoint == NULL) {
-            printErrorAllocation();
-        }
-
-        ptrMeanPoint = calloc(2, sizeof(float));
-        if (ptrMeanPoint == NULL) {
-            printErrorAllocation();
-        }
-
-        ptrDirectionalAnglesPoint = calloc(K, sizeof(float));
-        if (ptrDirectionalAnglesPoint == NULL) {
-            printErrorAllocation();
-        }
+        }*/
 
         ptrBorderPointsAll = calloc(N, sizeof(struct triple_float));
         if (ptrBorderPointsAll == NULL) {
@@ -82,33 +106,69 @@ int main(int argc, char *argv[]) {
         if (borderPointsAndLabels == NULL) {
             printErrorAllocation();
         }
+    }
 
-        // --------------------------------------------------- BORDER POINTS LOOP
+    MPI_Bcast(ptrPoints, N, mpi_double_float_type, 0, MPI_COMM_WORLD);
 
-        // Read data from the input file and create an array of points
-        for (i = 0; i < N; i++) {
-            // Find k nearest neighbors for each point and the mean point
-            getNeighbors(ptrPoints, ptrPoints[i].x, ptrPoints[i].y, ptrKnnPoint, ptrMeanPoint);
+    struct double_float *localPtrPoints = calloc(local_N, sizeof(struct double_float));
+    if (localPtrPoints == NULL) {
+        printErrorAllocation();
+    }
 
-            // Find directional angles between the center, its k nearest neighbors, and the mean point
-            for (j = 0; j < K; j++) {
-                ptrDirectionalAnglesPoint[j] = getDirectionalAngle(ptrPoints[i], ptrMeanPoint, ptrKnnPoint[j]);
-            }
+    MPI_Scatterv(ptrPoints, counts, displs, mpi_double_float_type, localPtrPoints, local_N, mpi_double_float_type, 0, MPI_COMM_WORLD);
 
-            // Find the border points with enclosing angle for each point and border degree
-            if (isBorderPoint(getEnclosingAngle(ptrDirectionalAnglesPoint)) == 1) {
-                ptrBorderPointsAll[counter].x = ptrPoints[i].x;
-                ptrBorderPointsAll[counter].y = ptrPoints[i].y;
-                ptrBorderPointsAll[counter].z = getBorderDegree(ptrDirectionalAnglesPoint);
-                ++counter;
-            }
+    struct double_float *localPtrKnnPoint = calloc(K, sizeof(struct double_float));
+    if (localPtrKnnPoint == NULL) {
+        printErrorAllocation();
+    }
+
+    float *localPtrMeanPoint = calloc(2, sizeof(float));
+    if (localPtrMeanPoint == NULL) {
+        printErrorAllocation();
+    }
+
+    float *localPtrDirectionalAnglesPoint = calloc(K, sizeof(float));
+    if (localPtrDirectionalAnglesPoint == NULL) {
+        printErrorAllocation();
+    }
+
+    struct triple_float *localPtrBorderPointsAll = calloc(local_N, sizeof(struct triple_float));
+    if (localPtrBorderPointsAll == NULL) {
+        printErrorAllocation();
+    }
+
+    // --------------------------------------------------- BORDER POINTS LOOP
+
+    // Read data from the input file and create an array of points
+    for (i = 0; i < counts[rank]; i++) {
+        // Find k nearest neighbors for each point and the mean point
+        getNeighbors(ptrPoints, localPtrPoints[i].x, localPtrPoints[i].y, localPtrKnnPoint, localPtrMeanPoint);
+
+        // Find directional angles between the center, its k nearest neighbors, and the mean point
+        for (j = 0; j < K; j++) {
+            localPtrDirectionalAnglesPoint[j] = getDirectionalAngle(localPtrPoints[i], localPtrMeanPoint, localPtrKnnPoint[j]);
         }
-        
-        // Free allocated memory
-        free(ptrKnnPoint);
-        free(ptrMeanPoint);
-        free(ptrDirectionalAnglesPoint);
 
+        // Find the border points with enclosing angle for each point and border degree
+        if (isBorderPoint(getEnclosingAngle(localPtrDirectionalAnglesPoint)) == 1) {
+            localPtrBorderPointsAll[counter].x = localPtrPoints[i].x;
+            localPtrBorderPointsAll[counter].y = localPtrPoints[i].y;
+            localPtrBorderPointsAll[counter].z = getBorderDegree(localPtrDirectionalAnglesPoint);
+            ++counter;
+        }
+    }
+
+    MPI_Gatherv(localPtrBorderPointsAll, local_N, mpi_triple_float_type, ptrBorderPointsAll, counts, displs, mpi_triple_float_type, 0, MPI_COMM_WORLD);
+
+    free(localPtrPoints);
+    free(displs);
+    free(counts);
+    free(localPtrKnnPoint);
+    free(localPtrMeanPoint);
+    free(localPtrDirectionalAnglesPoint);
+    free(localPtrBorderPointsAll);
+
+    if (rank == 0) {
         // Get factor border points
         getBorderPoints(ptrBorderPointsAll, counter, borderPointsAndLabels);
         free(ptrBorderPointsAll);
