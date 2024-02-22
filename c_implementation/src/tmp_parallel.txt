@@ -1,5 +1,0 @@
-Rank = 1, local_N = 125, localCounter = 12
-Rank = 2, local_N = 125, localCounter = 18
-Rank = 3, local_N = 125, localCounter = 6
-Rank = 0, local_N = 125, localCounter = 11
-counter = 47, factor = 150
