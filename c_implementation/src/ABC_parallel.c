@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     FILE *output = fopen("../results/results_parallel.txt", "w");
 
     // Variable declarations
-	int i = 0, j = 0, g = 0, d = 0, e = 0, counter = 0, factor = BETA * N, otherFactor = 0;
+	int i = 0, j = 0, g = 0, d = 0, e = 0, localCounter = 0, counter = 0, factor = BETA * N, otherFactor = 0;
 	float x, y = 0.0;
 
     // Variable declarations for parallelization
@@ -38,6 +38,9 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     // Number of processes in a communicator
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    float elapsed_time = - MPI_Wtime();
 
     MPI_Datatype mpi_double_float_type, mpi_triple_float_type;
     MPI_Type_contiguous(2, MPI_FLOAT, &mpi_double_float_type);
@@ -144,10 +147,6 @@ int main(int argc, char *argv[]) {
         // Find k nearest neighbors for each point and the mean point
         getNeighbors(ptrPoints, localPtrPoints[i].x, localPtrPoints[i].y, localPtrKnnPoint, localPtrMeanPoint);
 
-        for (j = 0; j < K; j++) {
-            printf("Rank %d: %f, %f, %f, %f, %f\n", rank, localPtrPoints[i].x, localPtrPoints[i].y, localPtrKnnPoint[j].x, localPtrKnnPoint[j].y, localPtrMeanPoint[j]);
-        }
-
         // Find directional angles between the center, its k nearest neighbors, and the mean point
         for (j = 0; j < K; j++) {
             localPtrDirectionalAnglesPoint[j] = getDirectionalAngle(localPtrPoints[i], localPtrMeanPoint, localPtrKnnPoint[j]);
@@ -155,14 +154,16 @@ int main(int argc, char *argv[]) {
 
         // Find the border points with enclosing angle for each point and border degree
         if (isBorderPoint(getEnclosingAngle(localPtrDirectionalAnglesPoint)) == 1) {
-            localPtrBorderPointsAll[counter].x = localPtrPoints[i].x;
-            localPtrBorderPointsAll[counter].y = localPtrPoints[i].y;
-            localPtrBorderPointsAll[counter].z = getBorderDegree(localPtrDirectionalAnglesPoint);
-            ++counter;
+            localPtrBorderPointsAll[localCounter].x = localPtrPoints[i].x;
+            localPtrBorderPointsAll[localCounter].y = localPtrPoints[i].y;
+            localPtrBorderPointsAll[localCounter].z = getBorderDegree(localPtrDirectionalAnglesPoint);
+            ++localCounter;
         }
     }
 
     MPI_Gatherv(localPtrBorderPointsAll, local_N, mpi_triple_float_type, ptrBorderPointsAll, counts, displs, mpi_triple_float_type, 0, MPI_COMM_WORLD);
+
+    MPI_Reduce(&localCounter, &counter, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
     free(localPtrPoints);
     free(displs);
@@ -171,6 +172,11 @@ int main(int argc, char *argv[]) {
     free(localPtrMeanPoint);
     free(localPtrDirectionalAnglesPoint);
     free(localPtrBorderPointsAll);
+
+    elapsed_time += MPI_Wtime();
+    if (rank == 0) {
+        printf("Elapsed time (parallel) = %f\n", elapsed_time);
+    }
 
     if (rank == 0) {
         // Get factor border points

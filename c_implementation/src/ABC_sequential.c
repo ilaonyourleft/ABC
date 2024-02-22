@@ -73,10 +73,6 @@ int main(int argc, char *argv[]) {
 	for (i = 0; i < N; i++) {
 		// Find k nearest neighbors for each point and the mean point
 		getNeighbors(ptrPoints, ptrPoints[i].x, ptrPoints[i].y, ptrKnnPoint, ptrMeanPoint);
-		for (j = 0; j < K; j++) {
-			printf("Rank 0: %f, %f, %f, %f, %f\n", ptrPoints[i].x, ptrPoints[i].y, ptrKnnPoint[j].x, ptrKnnPoint[j].y, ptrMeanPoint[j]);
-		}
-		
 
 		// Find directional angles between the center, its k nearest neighbors, and the mean point
 		for (j = 0; j < K; j++) {
