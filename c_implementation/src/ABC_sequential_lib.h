@@ -5,8 +5,8 @@
  */
 
 #define K 12  // 12
-#define BETA 0.3  // 0.2
-#define N 500  // 500
+#define BETA 0.2  // 0.2
+#define N 2500  // 500
 
 #define OPEN_FILE_ERROR -1
 #define MEMORY_ALLOCATION_ERROR -2
@@ -59,7 +59,7 @@ float directionAngleModifiedDistanceFunction(float aX, float aY, float bX, float
 int regionQuery(struct point_label *borderPointsAndLabels, struct triple_float *neighbors, int factor, float x, float y, int epsilon);
 int checkIfAlreadyNeighbor(struct triple_float *neighbors, int lenNeighbors, struct triple_float index);
 void growCluster(int factor, struct point_label *borderPointsAndLabels, int index, float x, float y, struct triple_float *neighbors, int lenNeighbors, int clusterId, int epsilon, int minNumberPoints);
-void getLabelsBorderPoints(int factor, int epsilon, int minNumberPoints, struct point_label *borderPointsAndLabels);
+void getLabelsBorderPoints(int factor, float epsilon, int minNumberPoints, struct point_label *borderPointsAndLabels);
 
 // CLUSTER
 int checkIfBorderPoint(struct point_label *borderPointsAndLabels, int factor, float x, float y);

@@ -16,8 +16,8 @@
 
 int main(int argc, char *argv[]) {
     // Open input and output files
-    FILE *file = fopen("../data/dataset1.csv", "r");
-    FILE *output = fopen("../results/results_parallel.txt", "w");
+    FILE *file = fopen("../data/dataset2500.csv", "r");
+    FILE *output = fopen("../results/results_parallel_2500.txt", "w");
 
     // Variable declarations
 	int i = 0, j = 0, g = 0, d = 0, e = 0, localCounter = 0, counter = 0, factor = BETA * N, otherFactor = 0;
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Get label for each border point
-        getLabelsBorderPoints(factor, 19000, 3, borderPointsAndLabels);
+        getLabelsBorderPoints(factor, 1, 3, borderPointsAndLabels);
 
         // Write border points and labels to the output file
         for (d = 0; d < factor; d++) {

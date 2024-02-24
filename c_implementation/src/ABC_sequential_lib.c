@@ -9,8 +9,8 @@
 #endif /* ABC_SEQUENTIAL_H_ */
 
 #define K 12  // 12
-#define BETA 0.3  // 0.2
-#define N 500  // 500
+#define BETA 0.2  // 0.2
+#define N 2500  // 500
 
 #define OPEN_FILE_ERROR -1
 #define MEMORY_ALLOCATION_ERROR -2
@@ -520,7 +520,7 @@ void growCluster(int factor, struct point_label *borderPointsAndLabels, int inde
  * @param minNumberPoints   	The minimum number of points required to form a cluster.
  * @param borderPointsAndLabels	The array to store the cluster labels. Struct of three elements: x (float), y (float), label (int).
  */
-void getLabelsBorderPoints(int factor, int epsilon, int minNumberPoints, struct point_label *borderPointsAndLabels) {
+void getLabelsBorderPoints(int factor, float epsilon, int minNumberPoints, struct point_label *borderPointsAndLabels) {
 	int clusterId = 0, i, j;
 
 	struct triple_float *ptrNeighbors = calloc(factor, sizeof(struct triple_float));

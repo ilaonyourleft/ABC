@@ -33,6 +33,6 @@ def read_points_from_file(path):
 
 
 if __name__ == '__main__':
-    file_path = 'results_parallel.txt'
+    file_path = 'results_parallel_10000.txt'
     x, y, lab = read_points_from_file(file_path)
     plot_points(x, y, lab)
