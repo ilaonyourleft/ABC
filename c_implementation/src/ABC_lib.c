@@ -1,5 +1,5 @@
 /*
- * ABC_sequential.h
+ * ABC_lib.c
  *
  *      Author: ilaria
  */
@@ -10,7 +10,7 @@
 
 #define K 12  // 12
 #define BETA 0.2  // 0.2
-#define N 2500  // 500
+#define N 10000  // 500
 
 #define OPEN_FILE_ERROR -1
 #define MEMORY_ALLOCATION_ERROR -2

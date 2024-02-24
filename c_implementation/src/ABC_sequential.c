@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "ABC_sequential_lib.h"
+#include "ABC_lib.h"
 
 int main(int argc, char *argv[]) {
 	// Open input and output files

@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name        : ABC_sequential.c
+ Name        : ABC_parallel.c
  Author      : Ilaria Malinconico
  Version     :
  Copyright   : Your copyright notice
@@ -12,12 +12,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "ABC_sequential_lib.h"
+#include "ABC_lib.h"
 
 int main(int argc, char *argv[]) {
     // Open input and output files
-    FILE *file = fopen("../data/dataset2500.csv", "r");
-    FILE *output = fopen("../results/results_parallel_2500.txt", "w");
+    FILE *file = fopen("../data/dataset10000.csv", "r");
+    FILE *output = fopen("../results/results_parallel_10000.txt", "w");
 
     // Variable declarations
 	int i = 0, j = 0, g = 0, d = 0, e = 0, localCounter = 0, counter = 0, factor = BETA * N, otherFactor = 0;
