@@ -4,7 +4,7 @@
  Author      : Ilaria Malinconico
  Version     :
  Copyright   : Your copyright notice
- Description : ABC sequential implementation
+ Description : ABC parallel implementation
  ============================================================================
  */
 
