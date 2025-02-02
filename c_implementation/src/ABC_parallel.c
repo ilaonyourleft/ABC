@@ -16,7 +16,7 @@
 
 int main(int argc, char *argv[]) {
     // Open input and output files
-    FILE *file = fopen("../data/dataset10000.csv", "r");
+    FILE *file = fopen("../data/dataset5000.csv", "r");
     FILE *output = fopen("../results/results_parallel_10000.txt", "w");
 
     // Variable declarations
@@ -179,6 +179,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (rank == 0) {
+        float elapsed_sequential_time = - MPI_Wtime();
+
         // Get factor border points
         getBorderPoints(ptrBorderPointsAll, counter, borderPointsAndLabels);
         free(ptrBorderPointsAll);
@@ -222,6 +224,9 @@ int main(int argc, char *argv[]) {
         // Free remaining allocated memory
         free(borderPointsAndLabels);
         free(internalPointsAndLabels);
+
+        elapsed_sequential_time += MPI_Wtime();
+        printf("Elapsed time (sequential) = %f\n", elapsed_sequential_time);
     }
 
 	// Close output file
