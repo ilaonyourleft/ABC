@@ -15,7 +15,7 @@
 
 int main(int argc, char *argv[]) {
 	// Open input and output files
-	FILE *file = fopen("../data/dataset2500.csv", "r");
+	FILE *file = fopen("../data/dataset10000.csv", "r");
 	FILE *output = fopen("../results/results_sequential.txt", "w");
 
 	// Variable declarations

@@ -16,7 +16,7 @@
 
 int main(int argc, char *argv[]) {
     // Open input and output files
-    FILE *file = fopen("../data/dataset5000.csv", "r");
+    FILE *file = fopen("../data/dataset10000.csv", "r");
     FILE *output = fopen("../results/results_parallel_10000.txt", "w");
 
     // Variable declarations
