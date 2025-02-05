@@ -14,6 +14,7 @@
 
 #define OPEN_FILE_ERROR -1
 #define MEMORY_ALLOCATION_ERROR -2
+#define EXIT_ERROR -3
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,6 +49,15 @@ struct triple_float {
 void printErrorAllocation() {
 	printf("Could not allocate memory to pointer.\n");
 	exit(MEMORY_ALLOCATION_ERROR);
+}
+
+/**
+ * Print an error message and exit the program if not enough points are available to continue
+ * computation.
+ */
+void printExitError() {
+	printf("Not enough points to continue the execution.\n");
+	exit(EXIT_ERROR);
 }
 
 // KNN methods

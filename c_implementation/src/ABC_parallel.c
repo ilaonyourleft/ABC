@@ -15,9 +15,13 @@
 #include "ABC_lib.h"
 
 int main(int argc, char *argv[]) {
-    // Open input and output files
-    FILE *file = fopen("../data/dataset10000.csv", "r");
-    FILE *output = fopen("../results/results_parallel_10000.txt", "w");
+	char filenameIn[50], filenameOut[50];
+	snprintf(filenameIn, sizeof(filenameIn), "../data/dataset%d.csv", N);
+	snprintf(filenameOut, sizeof(filenameOut), "../results/results_parallel_%d.txt", N);
+
+	// Open input and output files
+	FILE *file = fopen(filenameIn, "r");
+	FILE *output = fopen(filenameOut, "w");
 
     // Variable declarations
 	int i = 0, j = 0, g = 0, d = 0, e = 0, localCounter = 0, counter = 0, factor = BETA * N, otherFactor = 0;
@@ -49,8 +53,8 @@ int main(int argc, char *argv[]) {
     MPI_Type_commit(&mpi_triple_float_type);
 
     int chunkSize = N / size;
-    int start = rank * chunkSize;
-    int end = (rank == size - 1) ? N : start + chunkSize;
+    // int start = rank * chunkSize;
+    // int end = (rank == size - 1) ? N : start + chunkSize;
     int remainder = N % size;
 
     // --------------------------------------------------- MEMORY ALLOCATIONS

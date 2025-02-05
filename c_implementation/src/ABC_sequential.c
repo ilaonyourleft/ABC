@@ -14,9 +14,13 @@
 #include "ABC_lib.h"
 
 int main(int argc, char *argv[]) {
+	char filenameIn[50], filenameOut[50];
+	snprintf(filenameIn, sizeof(filenameIn), "../data/dataset%d.csv", N);
+	snprintf(filenameOut, sizeof(filenameOut), "../results/results_sequential_%d.txt", N);
+
 	// Open input and output files
-	FILE *file = fopen("../data/dataset10000.csv", "r");
-	FILE *output = fopen("../results/results_sequential.txt", "w");
+	FILE *file = fopen(filenameIn, "r");
+	FILE *output = fopen(filenameOut, "w");
 
 	// Variable declarations
 	int i = 0, j = 0, g = 0, d = 0, e = 0, counter = 0, factor = BETA * N, otherFactor = 0;
@@ -93,6 +97,10 @@ int main(int argc, char *argv[]) {
 	free(ptrMeanPoint);
 	free(ptrDirectionalAnglesPoint);
 
+	if (counter == 0) {
+		printExitError();
+	}
+
 	// Get factor border points
 	getBorderPoints(ptrBorderPointsAll, counter, borderPointsAndLabels);
 	free(ptrBorderPointsAll);
@@ -103,7 +111,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Get label for each border point
-	getLabelsBorderPoints(factor, 19000, 3, borderPointsAndLabels);
+	getLabelsBorderPoints(factor, 1, 3, borderPointsAndLabels);
 
 	// Write border points and labels to the output file
 	for (d = 0; d < factor; d++) {

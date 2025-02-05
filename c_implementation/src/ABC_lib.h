@@ -34,6 +34,7 @@ struct triple_float {
 
 // MISCELLANEOUS
 void printErrorAllocation();
+void printExitError();
 
 // KNN methods
 float euclideanDistance(float x1, float y1, float x2, float y2);
