@@ -161,5 +161,8 @@ c_implementation/src/ABC_sequential.dSYM/**
 .vscode/
 
 ABC_sequential
+ABC_sequential_bis
 ABC_parallel
+ABC_parallel_bis
+ABC_parallel_all
 *.o
